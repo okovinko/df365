@@ -446,7 +446,7 @@ paths:
               properties:
                 isFlowRequired:
                   type: boolean
-                  default: false
+                  # remove default to satisfy POST rule
                   description: |
                     Требуется запустить workflow. Все процессы запускаются
                     в единой транзакции.
@@ -1172,7 +1172,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/userText2000N'
       description: Наименование этапа
-      default: null
+      # removed default per response rule
       example: Согласование
     workflowStageToDoHint:
       allOf:
@@ -1182,7 +1182,7 @@ components:
     workflowStageIsBackToBeginIfDecline:
       type: boolean
       description: Этап является вехой
-      default: false
+      # removed default per response rule
     workflowStageType:
       description: Этап утверждения
       type: string
@@ -1201,7 +1201,7 @@ components:
       type: integer
       description: Номер итерации в случае повторения процесса
       nullable: true
-      default: 1
+      # removed default per response rule
       minimum: 1
     workflowMapRequest:
       type: object
@@ -1363,7 +1363,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/oguid'
       description: Кому назначено
-      default: null
+      # removed default per POST rule
     startConditionsResponse:
       type: array
       nullable: true
@@ -1477,7 +1477,7 @@ components:
             $ref: '#/components/schemas/ObjectTypeIsSystem'
           shortItemInfo:
             $ref: '#/components/schemas/shortItemInfoRequest'
-      - $ref: '#/components/schemas/objectTypeMenuProps'
+      - $ref: '#/components/schemas/objectTypeMenuPropsResponse'
     urlFriendlyKey:
       type: string
       description: Ключ поля
@@ -1553,11 +1553,11 @@ components:
 
                 '
             key:
-              $ref: '#/components/schemas/fieldObjectTypeN'
+              $ref: '#/components/schemas/fieldObjectTypeNRequest'
         isArray:
-          $ref: '#/components/schemas/fieldIsArray'
+          $ref: '#/components/schemas/fieldIsArrayRequest'
         selectList:
-          $ref: '#/components/schemas/SelectList'
+          $ref: '#/components/schemas/SelectListRequest'
         parentFieldKey:
           allOf:
           - $ref: '#/components/schemas/fieldKey'
@@ -1569,6 +1569,9 @@ components:
       description: Ключ поля
       example: sumTotal
     fieldIsArray:
+      description: Признак того, что поле принимает массив значений
+      type: boolean
+    fieldIsArrayRequest:
       description: Признак того, что поле принимает массив значений
       type: boolean
       default: false
@@ -1698,6 +1701,12 @@ components:
       description: Тип справочника
       nullable: true
       example: costCenter
+    fieldObjectTypeNRequest:
+      allOf:
+        - $ref: '#/components/schemas/urlFriendlyKey'
+      description: Тип справочника
+      nullable: true
+      example: costCenter
       default: null
     objectShort:
       type: object
@@ -1716,6 +1725,8 @@ components:
       type: object
       required:
       - name
+      - description # added for POST compliance
+      - description # added for POST compliance
       - fields
       properties:
         name:
@@ -1866,7 +1877,7 @@ components:
       pattern: ^([A-Za-z0-9._-])+@([A-Za-z0-9._-])+\.([A-Za-z]{2,63})$
       example: example@gmail.com
       description: Электронная почта
-      default: null
+      # removed default per response rule
     position:
       allOf:
       - $ref: '#/components/schemas/userText2000N'
@@ -1878,6 +1889,11 @@ components:
       pattern: ^([\p{L}\p{N}\p{S}\p{P}\p{Z}]){1,2000}$
       example: Длинный текст
     userText2000N:
+      allOf:
+      - $ref: '#/components/schemas/userText2000'
+      nullable: true
+      example: Длинный текст
+    userText2000NRequest:
       allOf:
       - $ref: '#/components/schemas/userText2000'
       nullable: true
@@ -1906,8 +1922,49 @@ components:
             $ref: '#/components/schemas/dictValue'
           parentKey:
             $ref: '#/components/schemas/dictKey'
+    SelectListRequest:
+      type: array
+      nullable: true
+      items:
+        type: object
+        required:
+        - key
+        - value
+        - parentKey
+        additionalProperties: false
+        properties:
+          key:
+            $ref: '#/components/schemas/dictKey'
+          value:
+            $ref: '#/components/schemas/dictValue'
+          parentKey:
+            $ref: '#/components/schemas/dictKey'
       default: null
     objectTypeMenuProps:
+      type: object
+      properties:
+        isMenuItem:
+          type: boolean
+          description: Object type is shown as a separate item in the navigation menu
+          nullable: false
+        customProperties:
+          type: object
+          description: Custom JSON properties attached to this object type
+          nullable: true
+          additionalProperties: true
+    objectTypeMenuPropsResponse:
+      type: object
+      properties:
+        isMenuItem:
+          type: boolean
+          description: Object type is shown as a separate item in the navigation menu
+          nullable: false
+        customProperties:
+          type: object
+          description: Custom JSON properties attached to this object type
+          nullable: true
+          additionalProperties: true
+    objectTypeMenuPropsRequest:
       type: object
       properties:
         isMenuItem:
@@ -1957,7 +2014,7 @@ components:
             $ref: '#/components/schemas/ObjectTypeIsFileType'
           shortItemInfo:
             $ref: '#/components/schemas/shortItemInfoRequest'
-      - $ref: '#/components/schemas/objectTypeMenuProps'
+      - $ref: '#/components/schemas/objectTypeMenuPropsRequest'
     shortItemInfoRequest:
       type: object
       required:
@@ -2002,13 +2059,18 @@ components:
     PolicyEntryRequest:
       type: object
       additionalProperties: false
+      # all properties required for PUT compliance
       required:
       - oguid
-      oneOf:
-      - required:
-        - role
-      - required:
-        - userOguid
+      - role
+      - userOguid
+      - visibility
+      - create
+      - fieldsWriteable
+      - fieldsVisibility
+      - delete
+      - downloadFile
+      - createFolder
       properties:
         oguid:
           allOf:
@@ -2018,12 +2080,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/roleOguid'
           nullable: true
-          default: null
         userOguid:
           allOf:
           - $ref: '#/components/schemas/oguid'
           nullable: true
-          default: null
         visibility:
           $ref: '#/components/schemas/VisibilitySettingRequest'
         create:
@@ -2031,13 +2091,9 @@ components:
         fieldsWriteable:
           allOf:
           - $ref: '#/components/schemas/FieldsWriteableSettingRequest'
-          default:
-            value: OWNER
         fieldsVisibility:
           allOf:
           - $ref: '#/components/schemas/FieldsVisibilitySettingRequest'
-          default:
-            value: VISIBLE_ALL
         delete:
           $ref: '#/components/schemas/DeleteSetting'
         downloadFile:
@@ -2206,8 +2262,6 @@ components:
           enum:
           - ALLOWED
           - DENIED
-      default:
-        value: ALLOWED
     FieldsWriteableSettingResponse:
       allOf:
       - $ref: '#/components/schemas/FieldsWriteableSetting'
@@ -2289,8 +2343,6 @@ components:
           enum:
           - OWNER
           - ALLOWED
-      default:
-        value: OWNER
     DownloadFileSetting:
       type: object
       required:
@@ -2302,8 +2354,6 @@ components:
           enum:
           - ALLOWED
           - DENIED
-      default:
-        value: ALLOWED
     CreateFolderSetting:
       type: object
       required:
@@ -2315,8 +2365,6 @@ components:
           enum:
           - ALLOWED
           - DENIED
-      default:
-        value: ALLOWED
     FilterRulesRequest:
       type: object
       additionalProperties: false
@@ -2456,6 +2504,7 @@ components:
       additionalProperties: false
       required:
       - name
+      - description # added for POST compliance
       properties:
         name:
           $ref: '#/components/schemas/folderName'
