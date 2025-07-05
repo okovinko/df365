@@ -148,7 +148,7 @@ paths:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
     - $ref: '#/components/parameters/appOguid'
-    - $ref: '#/components/schemas/objectTypeKey'
+    - $ref: '#/components/parameters/objectTypeKey'
     get:
       tags:
       - ObjectTypes>Accesses
@@ -282,7 +282,7 @@ paths:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
     - $ref: '#/components/parameters/appOguid'
-    - $ref: '#/components/schemas/objectTypeKey'
+    - $ref: '#/components/parameters/objectTypeKey'
     put:
       tags:
       - ObjectTypes
