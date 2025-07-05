@@ -946,7 +946,7 @@ components:
         workflowResult:
           $ref: '#/components/schemas/workflowObjectResult'
         workflowStageLabel:
-          $ref: '#/components/schemas/workflowStageLabel'
+          $ref: '#/components/schemas/workflowStageLabelResponse'
         workflowStageToDoHint:
           $ref: '#/components/schemas/workflowStageToDoHint'
         round:
@@ -1004,7 +1004,7 @@ components:
         workflowResult:
           $ref: '#/components/schemas/workflowObjectResult'
         workflowStageLabel:
-          $ref: '#/components/schemas/workflowStageLabel'
+          $ref: '#/components/schemas/workflowStageLabelResponse'
         workflowStageToDoHint:
           $ref: '#/components/schemas/workflowStageToDoHint'
         round:
@@ -1174,6 +1174,11 @@ components:
       description: Наименование этапа
       default: null
       example: Согласование
+    workflowStageLabelResponse:
+      allOf:
+      - $ref: '#/components/schemas/userText2000N'
+      description: Наименование этапа
+      example: Согласование
     workflowStageToDoHint:
       allOf:
       - $ref: '#/components/schemas/userText2000N'
@@ -1201,7 +1206,6 @@ components:
       type: integer
       description: Номер итерации в случае повторения процесса
       nullable: true
-      default: 1
       minimum: 1
     workflowMapRequest:
       type: object
@@ -1477,7 +1481,7 @@ components:
             $ref: '#/components/schemas/ObjectTypeIsSystem'
           shortItemInfo:
             $ref: '#/components/schemas/shortItemInfoRequest'
-      - $ref: '#/components/schemas/objectTypeMenuProps'
+      - $ref: '#/components/schemas/objectTypeMenuPropsResponse'
     urlFriendlyKey:
       type: string
       description: Ключ поля
@@ -1553,7 +1557,7 @@ components:
 
                 '
             key:
-              $ref: '#/components/schemas/fieldObjectTypeN'
+              $ref: '#/components/schemas/fieldObjectTypeNNoDefault'
         isArray:
           $ref: '#/components/schemas/fieldIsArray'
         selectList:
@@ -1572,6 +1576,9 @@ components:
       description: Признак того, что поле принимает массив значений
       type: boolean
       default: false
+    fieldIsArrayNoDefault:
+      description: Признак того, что поле принимает массив значений
+      type: boolean
     fieldType:
       description: Тип данных
       type: string
@@ -1699,6 +1706,12 @@ components:
       nullable: true
       example: costCenter
       default: null
+    fieldObjectTypeNNoDefault:
+      allOf:
+        - $ref: '#/components/schemas/urlFriendlyKey'
+      description: Тип справочника
+      nullable: true
+      example: costCenter
     objectShort:
       type: object
       required:
@@ -1866,7 +1879,6 @@ components:
       pattern: ^([A-Za-z0-9._-])+@([A-Za-z0-9._-])+\.([A-Za-z]{2,63})$
       example: example@gmail.com
       description: Электронная почта
-      default: null
     position:
       allOf:
       - $ref: '#/components/schemas/userText2000N'
@@ -1921,16 +1933,31 @@ components:
           nullable: true
           default: null
           additionalProperties: true
-    objectTypeCreateRequest:
-      allOf:
-      - type: object
-        additionalProperties: false
-        required:
-        - key
-        properties:
-          key:
-            $ref: '#/components/schemas/objectTypeKey'
-      - $ref: '#/components/schemas/objectTypeBaseRequest'
+    objectTypeMenuPropsResponse:
+      type: object
+      required:
+      - isMenuItem
+      - customProperties
+      properties:
+        isMenuItem:
+          type: boolean
+          description: Object type is shown as a separate item in the navigation menu
+          nullable: false
+        customProperties:
+          type: object
+          description: Custom JSON properties attached to this object type
+          nullable: true
+          additionalProperties: true
+  objectTypeCreateRequest:
+    allOf:
+    - type: object
+      additionalProperties: false
+      required:
+      - key
+      properties:
+        key:
+          $ref: '#/components/schemas/objectTypeKey'
+    - $ref: '#/components/schemas/objectTypeBaseRequest'
     objectTypeUpdateRequest:
       allOf:
       - type: object
@@ -1940,7 +1967,7 @@ components:
         properties:
           key:
             $ref: '#/components/schemas/objectTypeKey'
-      - $ref: '#/components/schemas/objectTypeBaseRequest'
+      - $ref: '#/components/schemas/objectTypeBaseRequestPut'
     objectTypeBaseRequest:
       allOf:
       - type: object
@@ -1958,6 +1985,23 @@ components:
           shortItemInfo:
             $ref: '#/components/schemas/shortItemInfoRequest'
       - $ref: '#/components/schemas/objectTypeMenuProps'
+    objectTypeBaseRequestPut:
+      allOf:
+      - type: object
+        required:
+        - name
+        - shortItemInfo
+        additionalProperties: false
+        properties:
+          name:
+            $ref: '#/components/schemas/objectTypeName'
+          description:
+            $ref: '#/components/schemas/objectTypeDescription'
+          isFileType:
+            $ref: '#/components/schemas/ObjectTypeIsFileType'
+          shortItemInfo:
+            $ref: '#/components/schemas/shortItemInfoRequest'
+      - $ref: '#/components/schemas/objectTypeMenuPropsResponse'
     shortItemInfoRequest:
       type: object
       required:
@@ -2018,12 +2062,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/roleOguid'
           nullable: true
-          default: null
         userOguid:
           allOf:
           - $ref: '#/components/schemas/oguid'
           nullable: true
-          default: null
         visibility:
           $ref: '#/components/schemas/VisibilitySettingRequest'
         create:
@@ -2031,13 +2073,9 @@ components:
         fieldsWriteable:
           allOf:
           - $ref: '#/components/schemas/FieldsWriteableSettingRequest'
-          default:
-            value: OWNER
         fieldsVisibility:
           allOf:
           - $ref: '#/components/schemas/FieldsVisibilitySettingRequest'
-          default:
-            value: VISIBLE_ALL
         delete:
           $ref: '#/components/schemas/DeleteSetting'
         downloadFile:
@@ -2100,8 +2138,7 @@ components:
         filter:
           $ref: '#/components/schemas/VisibilityFilterRequest'
       description: If **value = FILTER** ⇒ **filter** object is mandatory.
-      default:
-        value: OWN_OBJECTS
+
     VisibilitySettingResponse:
       type: object
       required:
@@ -2159,7 +2196,6 @@ components:
           - EXPRESSION
         isNeedToExcludeChild:
           type: integer
-          default: 0
           description: 0 = include child entities (default) · 1 = exclude children
         specifiedOguids:
           type: array
@@ -2186,7 +2222,6 @@ components:
           - EXPRESSION
         isNeedToExcludeChild:
           type: integer
-          default: 0
           description: 0 = include child entities (default) · 1 = exclude children
         specifiedOguids:
           type: array
@@ -2206,8 +2241,6 @@ components:
           enum:
           - ALLOWED
           - DENIED
-      default:
-        value: ALLOWED
     FieldsWriteableSettingResponse:
       allOf:
       - $ref: '#/components/schemas/FieldsWriteableSetting'
@@ -2289,8 +2322,6 @@ components:
           enum:
           - OWNER
           - ALLOWED
-      default:
-        value: OWNER
     DownloadFileSetting:
       type: object
       required:
@@ -2302,8 +2333,6 @@ components:
           enum:
           - ALLOWED
           - DENIED
-      default:
-        value: ALLOWED
     CreateFolderSetting:
       type: object
       required:
@@ -2315,8 +2344,6 @@ components:
           enum:
           - ALLOWED
           - DENIED
-      default:
-        value: ALLOWED
     FilterRulesRequest:
       type: object
       additionalProperties: false
@@ -2409,7 +2436,7 @@ components:
           key:
             allOf:
             - $ref: '#/components/schemas/objectTypeKey'
-      - $ref: '#/components/schemas/fieldBaseRequest'
+      - $ref: '#/components/schemas/fieldBaseRequestPut'
     fieldBaseRequest:
       type: object
       required:
@@ -2451,6 +2478,50 @@ components:
           default: null
           description: Parent field for selects
           nullable: true
+    fieldBaseRequestPut:
+      type: object
+      required:
+      - name
+      - type
+      - isArray
+      - parentKey
+      - referenceObjectType
+      - selectList
+      - parentFieldKey
+      additionalProperties: false
+      properties:
+        name:
+          $ref: '#/components/schemas/fieldName'
+        description:
+          $ref: '#/components/schemas/fieldDescription'
+        type:
+          $ref: '#/components/schemas/fieldType'
+        isArray:
+          $ref: '#/components/schemas/fieldIsArrayNoDefault'
+        parentKey:
+          allOf:
+          - $ref: '#/components/schemas/fieldKey'
+          nullable: true
+        referenceObjectType:
+          type: object
+          required:
+          - key
+          properties:
+            appOguid:
+              allOf:
+              - $ref: '#/components/schemas/oguid'
+              nullable: true
+              description: |
+                `null` value means current app, `non-null` value means foreign app
+            key:
+              $ref: '#/components/schemas/fieldObjectTypeNNoDefault'
+        selectList:
+          $ref: '#/components/schemas/SelectList'
+        parentFieldKey:
+          allOf:
+          - $ref: '#/components/schemas/fieldKey'
+          description: Parent field for selects
+          nullable: true
     folderBase:
       type: object
       additionalProperties: false
@@ -2473,6 +2544,29 @@ components:
           description: OGUID родительской папки
           nullable: true
           default: null
+    folderBaseResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - name
+      - description
+      - icon
+      - parentOguid
+      properties:
+        name:
+          $ref: '#/components/schemas/folderName'
+        description:
+          $ref: '#/components/schemas/folderDescription'
+        icon:
+          type: integer
+          format: int32
+          nullable: true
+          description: Иконка папки
+        parentOguid:
+          allOf:
+          - $ref: '#/components/schemas/oguid'
+          description: OGUID родительской папки
+          nullable: true
     folderRequest:
       allOf:
       - $ref: '#/components/schemas/folderBase'
@@ -2487,7 +2581,7 @@ components:
         properties:
           oguid:
             $ref: '#/components/schemas/oguid'
-      - $ref: '#/components/schemas/folderBase'
+      - $ref: '#/components/schemas/folderBaseResponse'
     objectTypeName:
       allOf:
       - $ref: '#/components/schemas/userText255'
