@@ -446,7 +446,6 @@ paths:
               properties:
                 isFlowRequired:
                   type: boolean
-                  default: false
                   description: |
                     Требуется запустить workflow. Все процессы запускаются
                     в единой транзакции.
@@ -678,7 +677,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/folderRequest'
+              $ref: '#/components/schemas/folderUpdateRequest'
       responses:
         '201':
           description: Добавленная папка
@@ -1172,7 +1171,6 @@ components:
       allOf:
       - $ref: '#/components/schemas/userText2000N'
       description: Наименование этапа
-      default: null
       example: Согласование
     workflowStageToDoHint:
       allOf:
@@ -1182,7 +1180,6 @@ components:
     workflowStageIsBackToBeginIfDecline:
       type: boolean
       description: Этап является вехой
-      default: false
     workflowStageType:
       description: Этап утверждения
       type: string
@@ -1201,7 +1198,6 @@ components:
       type: integer
       description: Номер итерации в случае повторения процесса
       nullable: true
-      default: 1
       minimum: 1
     workflowMapRequest:
       type: object
@@ -1363,7 +1359,6 @@ components:
       allOf:
       - $ref: '#/components/schemas/oguid'
       description: Кому назначено
-      default: null
     startConditionsResponse:
       type: array
       nullable: true
@@ -1477,7 +1472,15 @@ components:
             $ref: '#/components/schemas/ObjectTypeIsSystem'
           shortItemInfo:
             $ref: '#/components/schemas/shortItemInfoRequest'
-      - $ref: '#/components/schemas/objectTypeMenuProps'
+          isMenuItem:
+            type: boolean
+            description: Object type is shown as a separate item in the navigation menu
+            nullable: false
+          customProperties:
+            type: object
+            description: Custom JSON properties attached to this object type
+            nullable: true
+            additionalProperties: true
     urlFriendlyKey:
       type: string
       description: Ключ поля
@@ -1692,13 +1695,12 @@ components:
       allOf:
       - $ref: '#/components/schemas/oguid'
       description: OGUID загруженного файла с подписью
-    fieldObjectTypeN:
-      allOf:
-        - $ref: '#/components/schemas/urlFriendlyKey'
-      description: Тип справочника
-      nullable: true
-      example: costCenter
-      default: null
+  fieldObjectTypeN:
+    allOf:
+      - $ref: '#/components/schemas/urlFriendlyKey'
+    description: Тип справочника
+    nullable: true
+    example: costCenter
     objectShort:
       type: object
       required:
@@ -1768,13 +1770,16 @@ components:
               $ref: '#/components/schemas/roleName'
         isAdmin:
           $ref: '#/components/schemas/isUserAdmin'
-    itemTypeCreateRequest:
-      allOf:
-      - type: object
-        required:
-        - oguid
-        - key
-        properties:
+  itemTypeCreateRequest:
+    allOf:
+    - type: object
+      required:
+      - oguid
+      - key
+      - name
+      - description
+      - fields
+      properties:
           oguid:
             allOf:
             - $ref: '#/components/schemas/oguid'
@@ -1796,7 +1801,6 @@ components:
             items:
               $ref: '#/components/schemas/fieldKey'
             nullable: true
-            default: null
     DepartmentShort:
       type: object
       description: Organization department
@@ -1866,7 +1870,6 @@ components:
       pattern: ^([A-Za-z0-9._-])+@([A-Za-z0-9._-])+\.([A-Za-z]{2,63})$
       example: example@gmail.com
       description: Электронная почта
-      default: null
     position:
       allOf:
       - $ref: '#/components/schemas/userText2000N'
@@ -1904,9 +1907,8 @@ components:
             $ref: '#/components/schemas/dictKey'
           value:
             $ref: '#/components/schemas/dictValue'
-          parentKey:
-            $ref: '#/components/schemas/dictKey'
-      default: null
+        parentKey:
+          $ref: '#/components/schemas/dictKey'
     objectTypeMenuProps:
       type: object
       properties:
@@ -1919,7 +1921,6 @@ components:
           type: object
           description: Custom JSON properties attached to this object type
           nullable: true
-          default: null
           additionalProperties: true
     objectTypeCreateRequest:
       allOf:
@@ -1931,16 +1932,41 @@ components:
           key:
             $ref: '#/components/schemas/objectTypeKey'
       - $ref: '#/components/schemas/objectTypeBaseRequest'
-    objectTypeUpdateRequest:
-      allOf:
-      - type: object
-        additionalProperties: false
-        required:
-        - key
-        properties:
-          key:
-            $ref: '#/components/schemas/objectTypeKey'
-      - $ref: '#/components/schemas/objectTypeBaseRequest'
+  objectTypeUpdateRequest:
+    type: object
+    additionalProperties: false
+    required:
+    - key
+    - name
+    - shortItemInfo
+    - description
+    - isFileType
+    - isMenuItem
+    - customProperties
+    properties:
+      key:
+        $ref: '#/components/schemas/objectTypeKey'
+      name:
+        $ref: '#/components/schemas/objectTypeName'
+      description:
+        allOf:
+        - $ref: '#/components/schemas/userText2000'
+        description: Object type description
+        nullable: true
+        example: Description of the Invoice object type
+      isFileType:
+        $ref: '#/components/schemas/ObjectTypeIsFileType'
+      shortItemInfo:
+        $ref: '#/components/schemas/shortItemInfoRequest'
+      isMenuItem:
+        type: boolean
+        description: Object type is shown as a separate item in the navigation menu
+        nullable: false
+      customProperties:
+        type: object
+        description: Custom JSON properties attached to this object type
+        nullable: true
+        additionalProperties: true
     objectTypeBaseRequest:
       allOf:
       - type: object
@@ -1996,19 +2022,24 @@ components:
     ObjectTypeIsSystem:
       type: boolean
       description: Indicates whether the object type is system
-    ObjectTypeIsFileType:
-      type: boolean
-      description: Файловый тип объекта
+  ObjectTypeIsFileType:
+    type: boolean
+    description: Файловый тип объекта
+    default: false
     PolicyEntryRequest:
       type: object
       additionalProperties: false
       required:
       - oguid
-      oneOf:
-      - required:
-        - role
-      - required:
-        - userOguid
+      - role
+      - userOguid
+      - visibility
+      - create
+      - fieldsWriteable
+      - fieldsVisibility
+      - delete
+      - downloadFile
+      - createFolder
       properties:
         oguid:
           allOf:
@@ -2018,12 +2049,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/roleOguid'
           nullable: true
-          default: null
         userOguid:
           allOf:
           - $ref: '#/components/schemas/oguid'
           nullable: true
-          default: null
         visibility:
           $ref: '#/components/schemas/VisibilitySettingRequest'
         create:
@@ -2031,13 +2060,9 @@ components:
         fieldsWriteable:
           allOf:
           - $ref: '#/components/schemas/FieldsWriteableSettingRequest'
-          default:
-            value: OWNER
         fieldsVisibility:
           allOf:
           - $ref: '#/components/schemas/FieldsVisibilitySettingRequest'
-          default:
-            value: VISIBLE_ALL
         delete:
           $ref: '#/components/schemas/DeleteSetting'
         downloadFile:
@@ -2100,8 +2125,7 @@ components:
         filter:
           $ref: '#/components/schemas/VisibilityFilterRequest'
       description: If **value = FILTER** ⇒ **filter** object is mandatory.
-      default:
-        value: OWN_OBJECTS
+
     VisibilitySettingResponse:
       type: object
       required:
@@ -2159,7 +2183,6 @@ components:
           - EXPRESSION
         isNeedToExcludeChild:
           type: integer
-          default: 0
           description: 0 = include child entities (default) · 1 = exclude children
         specifiedOguids:
           type: array
@@ -2186,7 +2209,6 @@ components:
           - EXPRESSION
         isNeedToExcludeChild:
           type: integer
-          default: 0
           description: 0 = include child entities (default) · 1 = exclude children
         specifiedOguids:
           type: array
@@ -2195,20 +2217,18 @@ components:
           description: Needed when **type** is *SPECIFIED_DEPARTMENTS* or *SPECIFIED_FOLDER*
         expression:
           $ref: '#/components/schemas/filterWithOperatorResponse'
-    CreateSetting:
-      type: object
-      required:
-      - value
-      additionalProperties: false
-      properties:
-        value:
-          type: string
-          enum:
-          - ALLOWED
-          - DENIED
-      default:
-        value: ALLOWED
-    FieldsWriteableSettingResponse:
+  CreateSetting:
+    type: object
+    required:
+    - value
+    additionalProperties: false
+    properties:
+      value:
+        type: string
+        enum:
+        - ALLOWED
+        - DENIED
+  FieldsWriteableSettingResponse:
       allOf:
       - $ref: '#/components/schemas/FieldsWriteableSetting'
       - type: object
@@ -2278,45 +2298,39 @@ components:
           items:
             type: string
           description: Required when **value = HIDE_FIELDS**
-    DeleteSetting:
-      type: object
-      required:
-      - value
-      additionalProperties: false
-      properties:
-        value:
-          type: string
-          enum:
-          - OWNER
-          - ALLOWED
-      default:
-        value: OWNER
-    DownloadFileSetting:
-      type: object
-      required:
-      - value
-      additionalProperties: false
-      properties:
-        value:
-          type: string
-          enum:
-          - ALLOWED
-          - DENIED
-      default:
-        value: ALLOWED
-    CreateFolderSetting:
-      type: object
-      required:
-      - value
-      additionalProperties: false
-      properties:
-        value:
-          type: string
-          enum:
-          - ALLOWED
-          - DENIED
-      default:
-        value: ALLOWED
+  DeleteSetting:
+    type: object
+    required:
+    - value
+    additionalProperties: false
+    properties:
+      value:
+        type: string
+        enum:
+        - OWNER
+        - ALLOWED
+  DownloadFileSetting:
+    type: object
+    required:
+    - value
+    additionalProperties: false
+    properties:
+      value:
+        type: string
+        enum:
+        - ALLOWED
+        - DENIED
+  CreateFolderSetting:
+    type: object
+    required:
+    - value
+    additionalProperties: false
+    properties:
+      value:
+        type: string
+        enum:
+        - ALLOWED
+        - DENIED
     FilterRulesRequest:
       type: object
       additionalProperties: false
@@ -2342,7 +2356,6 @@ components:
       description: List of field keys referenced in policies.
       items:
         $ref: '#/components/schemas/fieldKey'
-      default: null
     filterWithOperatorRequest:
       description: |
         * the logical `AND` operation is applied to the separate expressions
@@ -2399,17 +2412,69 @@ components:
             allOf:
             - $ref: '#/components/schemas/fieldKey'
       - $ref: '#/components/schemas/fieldBaseRequest'
-    fieldUpdateRequest:
-      allOf:
-      - type: object
-        additionalProperties: false
+  fieldUpdateRequest:
+    type: object
+    additionalProperties: false
+    required:
+    - key
+    - name
+    - type
+    - isArray
+    - parentKey
+    - referenceObjectType
+    - selectList
+    - parentFieldKey
+    properties:
+      key:
+        allOf:
+        - $ref: '#/components/schemas/objectTypeKey'
+      name:
+        $ref: '#/components/schemas/fieldName'
+      description:
+        $ref: '#/components/schemas/fieldDescription'
+      type:
+        $ref: '#/components/schemas/fieldType'
+      isArray:
+        type: boolean
+      parentKey:
+        allOf:
+        - $ref: '#/components/schemas/fieldKey'
+        nullable: true
+      referenceObjectType:
+        type: object
         required:
         - key
         properties:
-          key:
+          appOguid:
             allOf:
-            - $ref: '#/components/schemas/objectTypeKey'
-      - $ref: '#/components/schemas/fieldBaseRequest'
+            - $ref: '#/components/schemas/oguid'
+            nullable: true
+            description: |
+              `null` value means current app, `non-null` value means foreign app
+          key:
+            $ref: '#/components/schemas/fieldObjectTypeN'
+      selectList:
+        type: array
+        nullable: true
+        items:
+          type: object
+          required:
+          - key
+          - value
+          - parentKey
+          additionalProperties: false
+          properties:
+            key:
+              $ref: '#/components/schemas/dictKey'
+            value:
+              $ref: '#/components/schemas/dictValue'
+            parentKey:
+              $ref: '#/components/schemas/dictKey'
+      parentFieldKey:
+        allOf:
+        - $ref: '#/components/schemas/fieldKey'
+        description: Parent field for selects
+        nullable: true
     fieldBaseRequest:
       type: object
       required:
@@ -2460,7 +2525,7 @@ components:
         name:
           $ref: '#/components/schemas/folderName'
         description:
-          $ref: '#/components/schemas/folderDescription'
+          $ref: '#/components/schemas/folderDescriptionResponse'
         icon:
           type: integer
           format: int32
@@ -2473,21 +2538,58 @@ components:
           description: OGUID родительской папки
           nullable: true
           default: null
-    folderRequest:
-      allOf:
-      - $ref: '#/components/schemas/folderBase'
-    folderResponse:
-      allOf:
-      - type: object
-        required:
-        - oguid
-        - description
-        - icon
-        - parentOguid
-        properties:
-          oguid:
-            $ref: '#/components/schemas/oguid'
-      - $ref: '#/components/schemas/folderBase'
+  folderRequest:
+    allOf:
+    - $ref: '#/components/schemas/folderBase'
+  folderUpdateRequest:
+    type: object
+    additionalProperties: false
+    required:
+    - name
+    - description
+    - icon
+    - parentOguid
+    properties:
+      name:
+        $ref: '#/components/schemas/folderName'
+      description:
+        $ref: '#/components/schemas/folderDescriptionResponse'
+      icon:
+        type: integer
+        format: int32
+        nullable: true
+        description: Иконка папки
+      parentOguid:
+        allOf:
+        - $ref: '#/components/schemas/oguid'
+        description: OGUID родительской папки
+        nullable: true
+  folderResponse:
+    allOf:
+    - type: object
+      required:
+      - oguid
+      - name
+      - description
+      - icon
+      - parentOguid
+      properties:
+        oguid:
+          $ref: '#/components/schemas/oguid'
+        name:
+          $ref: '#/components/schemas/folderName'
+        description:
+          $ref: '#/components/schemas/folderDescriptionResponse'
+        icon:
+          type: integer
+          format: int32
+          nullable: true
+          description: Иконка папки
+        parentOguid:
+          allOf:
+          - $ref: '#/components/schemas/oguid'
+          description: OGUID родительской папки
+          nullable: true
     objectTypeName:
       allOf:
       - $ref: '#/components/schemas/userText255'
@@ -2523,11 +2625,17 @@ components:
       - $ref: '#/components/schemas/userText255'
       description: Folder name
       example: Contracts
-    folderDescription:
-      allOf:
-      - $ref: '#/components/schemas/userText2000N'
-      description: Folder description
-      example: Folder containing contract files
+  folderDescription:
+    allOf:
+    - $ref: '#/components/schemas/userText2000N'
+    description: Folder description
+    example: Folder containing contract files
+  folderDescriptionResponse:
+    allOf:
+    - $ref: '#/components/schemas/userText2000'
+    description: Folder description
+    nullable: true
+    example: Folder containing contract files
     roleKey:
       allOf:
       - $ref: '#/components/schemas/objectTypeKey'
