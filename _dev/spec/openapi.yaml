@@ -1470,14 +1470,14 @@ components:
           name:
             $ref: '#/components/schemas/objectTypeName'
           description:
-            $ref: '#/components/schemas/objectTypeDescription'
+            $ref: '#/components/schemas/objectTypeDescriptionNoDefault'
           isFileType:
             $ref: '#/components/schemas/ObjectTypeIsFileType'
           isSystem:
             $ref: '#/components/schemas/ObjectTypeIsSystem'
           shortItemInfo:
             $ref: '#/components/schemas/shortItemInfoRequest'
-      - $ref: '#/components/schemas/objectTypeMenuProps'
+      - $ref: '#/components/schemas/objectTypeMenuPropsRequired'
     urlFriendlyKey:
       type: string
       description: Ключ поля
@@ -1883,6 +1883,11 @@ components:
       nullable: true
       default: null
       example: Длинный текст
+    userText2000NNoDefault:
+      allOf:
+      - $ref: '#/components/schemas/userText2000'
+      nullable: true
+      example: Длинный текст
     userText255:
       type: string
       description: User text
@@ -1921,6 +1926,21 @@ components:
           nullable: true
           default: null
           additionalProperties: true
+    objectTypeMenuPropsRequired:
+      type: object
+      required:
+      - isMenuItem
+      - customProperties
+      properties:
+        isMenuItem:
+          type: boolean
+          description: Object type is shown as a separate item in the navigation menu
+          nullable: false
+        customProperties:
+          type: object
+          description: Custom JSON properties attached to this object type
+          nullable: true
+          additionalProperties: true
     objectTypeCreateRequest:
       allOf:
       - type: object
@@ -1940,7 +1960,7 @@ components:
         properties:
           key:
             $ref: '#/components/schemas/objectTypeKey'
-      - $ref: '#/components/schemas/objectTypeBaseRequest'
+      - $ref: '#/components/schemas/objectTypeBaseUpdateRequest'
     objectTypeBaseRequest:
       allOf:
       - type: object
@@ -1955,9 +1975,29 @@ components:
             $ref: '#/components/schemas/objectTypeDescription'
           isFileType:
             $ref: '#/components/schemas/ObjectTypeIsFileType'
+            default: false
           shortItemInfo:
             $ref: '#/components/schemas/shortItemInfoRequest'
       - $ref: '#/components/schemas/objectTypeMenuProps'
+    objectTypeBaseUpdateRequest:
+      allOf:
+      - type: object
+        required:
+        - name
+        - description
+        - isFileType
+        - shortItemInfo
+        additionalProperties: false
+        properties:
+          name:
+            $ref: '#/components/schemas/objectTypeName'
+          description:
+            $ref: '#/components/schemas/objectTypeDescriptionNoDefault'
+          isFileType:
+            $ref: '#/components/schemas/ObjectTypeIsFileType'
+          shortItemInfo:
+            $ref: '#/components/schemas/shortItemInfoRequest'
+      - $ref: '#/components/schemas/objectTypeMenuPropsRequired'
     shortItemInfoRequest:
       type: object
       required:
@@ -2496,6 +2536,11 @@ components:
     objectTypeDescription:
       allOf:
       - $ref: '#/components/schemas/userText2000N'
+      description: Object type description
+      example: Description of the Invoice object type
+    objectTypeDescriptionNoDefault:
+      allOf:
+      - $ref: '#/components/schemas/userText2000NNoDefault'
       description: Object type description
       example: Description of the Invoice object type
     itemTypeName:
