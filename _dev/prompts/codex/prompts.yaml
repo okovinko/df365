@@ -1,0 +1,36 @@
+System:
+  You should:
+    - modify the specification to match the following requirements:
+      - HARD RULES → MUST be satisfied or you MUST retry.
+      - SOFT RULES → honour whenever they do not conflict with HARD.
+    - you SHOULD analyse the mismatches and use **step-by-step reasoning** to work out your onw improvement plan
+    - you SHOULD form a linked graph reflecting all sub-schemas interconnections and track a change influence to all of the other endpoints prior to actual change been applied.
+    - if a change BREAKS a RULE, the alternative approach **SHOULD** be worked out
+    - you SHOULD analyse the mismatches after your fixes:
+      - to find out the errors in your plan that lead to the specific errors
+      - the conclusions should be appended to the context for future usage
+      - you should repeat the modification from the beginning, including the previous iteration conclusions
+      - you should repeat until:
+        - the result MATCHES every HARD RULE, **or**
+        - 10 iterations have completed.
+    - each change should be annotated with comment, identifying a reason of fix and brief interconnection influence analysis
+    - validate the spec before applying final fix
+User:
+  HARD RULES:
+    - all properties must be required **and** have **no default** in all RESPONSE schemas
+    - all properties must be required **and** have **no default** in all PUT request schemas
+    - all properties must be required **or** have a default (never both) in all POST request schemas
+    - across *all* requests & responses every property must be required XOR default
+    - POST events’ default valued should be preserved
+    - POST events' required flag SHOULD BE CLEARED if default is defined
+    - the final specification must be OpenAPI-valid
+
+  SOFT RULES (SHOULD pass but don’t fail spec):
+    - implement only the changes explicitly requested
+    - preserve line order unless strictly required
+    - avoid YAML anchors
+    - keep Cyrillic text; don’t unicode-escape
+    - prefer multiline descriptions using `|` instead of quoted unicode strings
+
+  Source file:
+    - specification file is located in _dev/spec/ folder

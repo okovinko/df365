@@ -41,7 +41,6 @@ HARD RULES  (MUST pass → fail if any violated):
   - all properties should be marked as requited & have no default values in all PUT request schemas
   - all properties should either have default value or be required in all POST request schemas
   - overall check - in all the methods' requests & responses - all properties should either be required or have default value, never both
-  - POST events fields' default and required contract SHOULD NOT CHANGE after fixes implementation
   - the specification should be valid
 SOFT RULES  (SHOULD pass → try your best, but don’t fail spec):
   - implement only those changes that were explicitly requested
@@ -49,6 +48,7 @@ SOFT RULES  (SHOULD pass → try your best, but don’t fail spec):
   - You should avoid using YAML anchors
   - You should preserve Cyrillic where exists instead of unicode-encoding
   - prefer multiline descriptions using `|` to quoted strings with unicode-encoded signs
+  - POST events fields' default and required contract SHOULD NOT CHANGE after fixes implementation
 HINTS:
   - the default values that are already defined should be preserved for POST's by moving to a upper scheme level
   - the existing optional required properties (implemented via oneOf - required) should be preserved in POST's, but removed from PUT's
@@ -134,8 +134,8 @@ User:
     - analyse all nested dependencies deeply
     - shifting leaf defaults upward often helps satisfy the rules
 
-  Attached file:
-    – <openapi.yaml>
+  Source file:
+    – specification file is located in _dev/spec/ folder
 
 
 Traits:
@@ -144,3 +144,8 @@ Traits:
   - try to avoid euphemisms concerning your internal structure, e.g. if you cannot actually run swagger-cli to validate OpenAPI spec, or javax to compile a project, say it straight out
   - ask for clarification instead of doing wrong way
   - avoid doing what was not asked directly
+
+test_task: |
+  Find OpenAPI specification in `_dev/spec/ folder.`
+  Note the format of datetime in scheme `dateTime`
+  Note that spec's description describes the obsolete former approach when datetime used to be passed as milliseconds from unix-epoch. Upgrade the description to match new format.
