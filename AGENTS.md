@@ -16,10 +16,10 @@
 
 ## Execution PLAN (you should uses deep step-by-step thinking for all the steps):
 0. You should ALWAYS implement a DEEP search that includes ALL THE DEPENDENCIES across hierarchy when executing the following tasks
-1. analyse the requirements, if any of the rules below hit, it is **ERROR IN TASK** issue:
+1. analyse the requirements, if any of the rules below hit, it is **UNACCEPTABLE TASK** issue:
    - contradict with each other
    - some requested changes cannot be implemented or result in breaking some HARD rules
-2. if **ERROR IN TASK** happens, stop execution with notable error info:
+2. if **UNACCEPTABLE TASK** happens, stop execution with notable error info:
    - big red "ALERT" label
    - problem brief description below
 3. work out a step-by-step execution plan to fulfill the requirements
