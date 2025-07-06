@@ -48,6 +48,7 @@ paths:
   /apps/{appOguid}/users:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     get:
       tags:
@@ -92,6 +93,7 @@ paths:
   /apps/{appOguid}/users/{userOguid}:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     - $ref: '#/components/parameters/userOguid'
     get:
@@ -147,6 +149,7 @@ paths:
   /apps/{appOguid}/objectTypes/{objectTypeKey}/accesses:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     - $ref: '#/components/schemas/objectTypeKey'
     get:
@@ -195,6 +198,7 @@ paths:
   /apps/{appOguid}/objectTypes/{objectTypeKey}/itemTypes:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     - $ref: '#/components/parameters/objectTypeKey'
     get:
@@ -236,6 +240,7 @@ paths:
   /apps/{appOguid}/objectTypes:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     get:
       tags:
@@ -281,6 +286,7 @@ paths:
   /apps/{appOguid}/objectTypes/{objectTypeKey}:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     - $ref: '#/components/schemas/objectTypeKey'
     put:
@@ -320,6 +326,7 @@ paths:
   /apps/{appOguid}/objectTypes/{objectTypeKey}/fields:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     - $ref: '#/components/parameters/objectTypeKey'
     get:
@@ -368,6 +375,7 @@ paths:
   /apps/{appOguid}/objectTypes/{objectTypeKey}/fields/{fieldKey}:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     - $ref: '#/components/parameters/fieldKey'
     - $ref: '#/components/parameters/objectTypeKey'
@@ -409,6 +417,7 @@ paths:
     summary: Работа с объектами
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     - $ref: '#/components/parameters/objectTypeKey'
     get:
@@ -487,6 +496,7 @@ paths:
     summary: Работа с объектом
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     - $ref: '#/components/parameters/objectTypeKey'
     get:
@@ -557,6 +567,7 @@ paths:
     summary: Работа с объектами
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     - $ref: '#/components/parameters/objectTypeKey'
     get:
@@ -581,6 +592,7 @@ paths:
     summary: Загрузка файлов на "полку"
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     post:
       tags:
@@ -612,6 +624,7 @@ paths:
   /apps/{appOguid}/objectAttachments/{objectAttachmentOguid}:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     - $ref: '#/components/parameters/objectOguid'
     - $ref: '#/components/parameters/objectAttachmentOguid'
@@ -648,6 +661,7 @@ paths:
   /apps/{appOguid}/objectTypes/{objectTypeKey}/folders:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     - $ref: '#/components/parameters/objectTypeKey'
     get:
@@ -693,6 +707,7 @@ paths:
   /apps/{appOguid}/objectTypes/{objectTypeKey}/folders/{folderOguid}:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     - $ref: '#/components/parameters/objectTypeKey'
     - $ref: '#/components/parameters/folderOguid'
@@ -749,6 +764,7 @@ paths:
   /apps/{appOguid}/roles:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     get:
       tags:
@@ -793,6 +809,7 @@ paths:
   /apps/{appOguid}/roles/{roleOguid}:
     parameters:
     - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/correlationId' # added to support request tracking
     - $ref: '#/components/parameters/appOguid'
     - $ref: '#/components/parameters/roleOguid'
     get:
@@ -2599,6 +2616,14 @@ components:
         type: string
         default: en
       description: Сообщает серверу, какая локаль предпочтительнее
+    correlationId:
+      name: Correlation-Id
+      in: header
+      required: false
+      schema:
+        type: string
+        pattern: '^[0-9A-Za-z]{8}$'
+      description: Header for request correlation # added
     orgOguid:
       in: path
       name: orgOguid
