@@ -1167,11 +1167,11 @@ components:
       - null
       readOnly: true
       example: SOLVED
-      workflowStageLabel:
-        allOf:
-        - $ref: '#/components/schemas/userText2000N'
-        description: Наименование этапа
-        example: Согласование
+    workflowStageLabel:
+      allOf:
+      - $ref: '#/components/schemas/userText2000N'
+      description: Наименование этапа
+      example: Согласование
     workflowStageToDoHint:
       allOf:
       - $ref: '#/components/schemas/userText2000N'
