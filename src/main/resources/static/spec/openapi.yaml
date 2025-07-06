@@ -1,0 +1,2703 @@
+openapi: 3.0.3
+servers:
+- description: Default API Infologistics docuForce 365 Storage
+  url: /
+info:
+  title: docuForce 365 OBJECTS specification
+  description: |
+    API Infologistics docuForce 365 Storage
+    Данные, содержащиеся в полях типа DateTime (Дата и время) на сервере хранятся
+    в часовом поясе UTC. Обмен между клиентом и сервером полей DateTime производится
+    в строковом виде в формате YYYY-MM-DDThh:mm:ss±hh. Например, 01 Января 2021 года
+    в часовом поясе +03:00 будет передан как 2021-01-01T00:00:00+03.
+
+    Для передачи смещения времени относительно UTC используется заголовок utc_offset
+    в формате +(-)HH:mm. Например +03:00'
+  version: '1.0'
+  name: API Infologistics docuForce 365 Storage
+tags:
+- name: Users
+- name: Roles
+- name: ObjectTypes
+- name: ObjectTypes>Accesses
+  description: |
+    Register **access-control entries (ACEs)** for a given **objectType**.
+
+    *Each entry links either a **user** or a **role** to a set of policy values.
+    Any policy object may be **omitted or set to `null`** – the service will then
+    fall back to the default for that group.*
+
+    **Defaults (applied when the policy is `null` or missing)**
+
+    | Group            | Default value |
+    |------------------|---------------|
+    | visibility       | `OWN_OBJECTS` |
+    | create           | `ALLOWED` |
+    | fieldsWriteable  | `OWNER` |
+    | fieldsVisibility | `VISIBLE_ALL` |
+    | delete           | `OWNER` |
+    | downloadFile     | `ALLOWED` |
+    | createFolder     | `ALLOWED` |
+
+- name: ObjectTypes>Fields
+- name: ObjectTypes>ItemTypes
+- name: ObjectTypes>Folders
+- name: ObjectTypes>Objects
+- name: ObjectTypes>Attachments
+paths:
+  /apps/{appOguid}/users:
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    get:
+      tags:
+      - Users
+      summary: Список пользователей приложения
+      operationId: getOrgUsersV1
+      responses:
+        '200':
+          description: Коллекция app-users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/appUserResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    post:
+      tags:
+      - Users
+      summary: Добавление пользователя в приложение
+      operationId: postOrgUsersV1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/appUserRequest'
+      responses:
+        '201':
+          description: Добавленный app-user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appUserResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/users/{userOguid}:
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    - $ref: '#/components/parameters/userOguid'
+    get:
+      tags:
+      - Users
+      summary: Данные пользователя приложения
+      operationId: getOrgappUserOguidV1
+      responses:
+        '200':
+          description: app-user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appUserRequest'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+      - Users
+      summary: Обновление пользователя приложения
+      operationId: putOrgappUserOguidV1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/appUserRequest'
+      responses:
+        '200':
+          description: Обновлённый app-user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appUserResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+      - Users
+      summary: Удаление пользователя
+      operationId: deleteUserOguidV1
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/objectTypes/{objectTypeKey}/accesses:
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    - $ref: '#/components/schemas/objectTypeKey'
+    get:
+      tags:
+      - ObjectTypes>Accesses
+      summary: Список доступов к объекту
+      operationId: getOrgAccessesV1
+      responses:
+        '200':
+          description: Коллекция доступов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PolicyEntryResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+      - ObjectTypes>Accesses
+      summary: 'Добавление или замена правил доступов к объекту
+
+        '
+      description: "* Full list of accessed needs to be passed\n* `oguid` field is\
+        \ nullable:\n  * `null` value means that a new access should be added\n  *\
+        \ `non-null` value means that the corresponding access should be updated\n"
+      operationId: postOrgAccessesV1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PolicyEntryRequest'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/objectTypes/{objectTypeKey}/itemTypes:
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    - $ref: '#/components/parameters/objectTypeKey'
+    get:
+      tags:
+      - ObjectTypes>ItemTypes
+      summary: Справочник item-типов объекта
+      operationId: getOrgObjectTypeItemTypesV1
+      responses:
+        '200':
+          description: Список item-типов выбранного objectType
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/itemTypeResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+      - ObjectTypes>ItemTypes
+      summary: Добавление item-типа
+      operationId: postOrgObjectTypeItemTypesV1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/itemTypeCreateRequest'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/objectTypes:
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    get:
+      tags:
+      - ObjectTypes
+      summary: Справочник типов объектов
+      operationId: getOrgObjectsTypesV1
+      responses:
+        '200':
+          description: Список типов внешних объектов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/objectTypeResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    post:
+      tags:
+      - ObjectTypes
+      summary: Добавление типа объекта
+      operationId: postOrgObjectTypesV1
+      requestBody:
+        description: Новый тип объекта
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/objectTypeCreateRequest'
+      responses:
+        '201':
+          description: Добавленный тип
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/objectTypeResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/objectTypes/{objectTypeKey}:
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    - $ref: '#/components/schemas/objectTypeKey'
+    put:
+      tags:
+      - ObjectTypes
+      summary: Обновление типа объекта
+      operationId: putOrgObjectTypeKeyV1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/objectTypeUpdateRequest'
+      responses:
+        '200':
+          description: Обновленный тип
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/objectTypeResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      summary: Удалить тип
+      operationId: deleteOrgObjectTypeKeyV1
+      tags:
+      - ObjectTypes
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/objectTypes/{objectTypeKey}/fields:
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    - $ref: '#/components/parameters/objectTypeKey'
+    get:
+      tags:
+      - ObjectTypes>Fields
+      summary: Поля объекта
+      operationId: getOrgFieldsV1
+      responses:
+        '200':
+          description: Список полей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/fieldResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    post:
+      tags:
+      - ObjectTypes>Fields
+      summary: Добавление поля
+      operationId: postOrgFieldsV1
+      requestBody:
+        description: Создать поле
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/fieldCreateRequest'
+      responses:
+        '201':
+          description: Добавленное поле
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/fieldResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/objectTypes/{objectTypeKey}/fields/{fieldKey}:
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    - $ref: '#/components/parameters/fieldKey'
+    - $ref: '#/components/parameters/objectTypeKey'
+    put:
+      tags:
+      - ObjectTypes>Fields
+      summary: Обновление поля
+      operationId: putOrgFieldKeyV1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/fieldUpdateRequest'
+      responses:
+        '200':
+          description: Обновленное поле
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/fieldResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      summary: Удалить поле
+      operationId: deleteOrgFieldKeyV1
+      tags:
+      - ObjectTypes>Fields
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/objectTypes/{objectTypeKey}/objects:
+    summary: Работа с объектами
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    - $ref: '#/components/parameters/objectTypeKey'
+    get:
+      tags:
+      - ObjectTypes>Objects
+      summary: Получение объектов
+      operationId: getOrgDocsV1
+      responses:
+        '200':
+          description: Список объектов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/objectResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    post:
+      tags:
+      - ObjectTypes>Objects
+      summary: Создание объектов
+      operationId: postOrgDocsV1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - isFlowRequired
+              - workflow
+              - objects
+              properties:
+                isFlowRequired:
+                  type: boolean
+                  default: false
+                  description: |
+                    Требуется запустить workflow. Все процессы запускаются
+                    в единой транзакции.
+
+                    Ошибка отменяет создание всего пакета объектов. В тексте ошибки
+                    возвращается номер объекта в пакете
+
+                    * **workflowStages != null** - процесс для каждого объекта задается
+                    во **workflowStages**
+
+                    * **workflowStages == null** - для каждого объекта подбирается
+                    **route** в соответствии с **startConditions**. Если подобрать
+                    не удается - ошибка.
+                workflow:
+                  allOf:
+                  - description: Схема процесса для запуска. Если null - запускается
+                      процесс по умолчанию.
+                    nullable: true
+                  - $ref: '#/components/schemas/workflowMapRequest'
+                objects:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/objectRequest'
+      responses:
+        '201':
+          description: GUID-ы созданных объектов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/oguid'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/objectTypes/{objectTypeKey}/objects/{objectOguid}:
+    summary: Работа с объектом
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    - $ref: '#/components/parameters/objectTypeKey'
+    get:
+      parameters:
+      - $ref: '#/components/parameters/objectOguid'
+      tags:
+      - ObjectTypes>Objects
+      summary: Получение объекта
+      operationId: getOrgDocV1
+      responses:
+        '200':
+          description: Объект
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/objectGetSingle'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      parameters:
+      - $ref: '#/components/parameters/objectOnlyOguid'
+      - in: query
+        name: isResponseRequired
+        description: Требуется ли возвращать объект в ответе
+        required: false
+        schema:
+          type: boolean
+      tags:
+      - ObjectTypes>Objects
+      summary: Обновление полей объекта
+      operationId: putOrgDocV1
+      requestBody:
+        description: Объект с полями, который нужно обновить
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/objectPut'
+      responses:
+        '200':
+          description: Объект с обновленными полями
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/objectGetSingle'
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      parameters:
+      - $ref: '#/components/parameters/objectOnlyOguid'
+      summary: Удаление объекта
+      operationId: deleteOrgDocV1
+      tags:
+      - ObjectTypes>Objects
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/objectTypes/{objectTypeKey}/objectShorts:
+    summary: Работа с объектами
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    - $ref: '#/components/parameters/objectTypeKey'
+    get:
+      tags:
+      - ObjectTypes>Objects
+      summary: Short object list
+      operationId: getOrgDocsShortV1
+      responses:
+        '200':
+          description: Short object list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/objectShort'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/shelf:
+    summary: Загрузка файлов на "полку"
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    post:
+      tags:
+      - ObjectTypes>Attachments
+      summary: Загрузка файл "на полку"
+      description: 'Максимальный размер: 1000МБ для Pdf, 100Мб для всех остальных'
+      operationId: postOrgShelfFilesV1
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  $ref: '#/components/schemas/fileBinary'
+              required:
+              - file
+      responses:
+        '201':
+          description: GUID записи с загруженным объектом для последующего связывания
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/uploadedFileOguid'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/objectAttachments/{objectAttachmentOguid}:
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    - $ref: '#/components/parameters/objectOguid'
+    - $ref: '#/components/parameters/objectAttachmentOguid'
+    get:
+      tags:
+      - ObjectTypes>Attachments
+      summary: Получение файла объекта
+      operationId: getOrgDocAttachmentsFileV1
+      responses:
+        '200':
+          headers:
+            Content-type:
+              description: mime возвращаемых данных. application/octet-stream если не распознает по расширению файла
+              schema:
+                type: string
+                example: application/octet-stream
+            Content-Disposition:
+              description: содержит имя файла с расширением
+              schema:
+                type: string
+                example: attachment; filename="test.doc"
+          description: Получение выбранного файла
+          content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/fileBinary'
+            application/pdf:
+              schema:
+                $ref: '#/components/schemas/fileBinary'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/objectTypes/{objectTypeKey}/folders:
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    - $ref: '#/components/parameters/objectTypeKey'
+    get:
+      tags:
+      - ObjectTypes>Folders
+      summary: Список папок приложения
+      operationId: getOrgFoldersV1
+      responses:
+        '200':
+          description: Коллекция app-folders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/folderResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    post:
+      tags:
+      - ObjectTypes>Folders
+      summary: Добавление папки
+      operationId: postOrgFoldersV1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/folderRequest'
+      responses:
+        '201':
+          description: Добавленная папка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/folderResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/objectTypes/{objectTypeKey}/folders/{folderOguid}:
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    - $ref: '#/components/parameters/objectTypeKey'
+    - $ref: '#/components/parameters/folderOguid'
+    get:
+      tags:
+      - ObjectTypes>Folders
+      summary: Данные папки
+      operationId: getOrgFolderOguidV1
+      responses:
+        '200':
+          description: app-folder
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/folderResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+      - ObjectTypes>Folders
+      summary: Обновление папки
+      operationId: putOrgFolderOguidV1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/folderRequest'
+      responses:
+        '200':
+          description: Обновленная папка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/folderResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+      - ObjectTypes>Folders
+      summary: Удаление папки
+      operationId: deleteOrgFolderOguidV1
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/roles:
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    get:
+      tags:
+      - Roles
+      summary: Список ролей приложения
+      operationId: getOrgRolesV1
+      responses:
+        '200':
+          description: Коллекция ролей приложения
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/roleResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    post:
+      tags:
+      - Roles
+      summary: Добавление роли в приложение
+      operationId: postOrgRolesV1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/roleRequest'
+      responses:
+        '201':
+          description: Добавленная роль
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/roleResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /apps/{appOguid}/roles/{roleOguid}:
+    parameters:
+    - $ref: '#/components/parameters/acceptLanguage'
+    - $ref: '#/components/parameters/appOguid'
+    - $ref: '#/components/parameters/roleOguid'
+    get:
+      tags:
+      - Roles
+      summary: Данные роли приложения
+      operationId: getOrgRoleOguidV1
+      responses:
+        '200':
+          description: Роль
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/roleResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+      - Roles
+      summary: Обновление роли приложения
+      operationId: putOrgRoleOguidV1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/roleRequest'
+      responses:
+        '200':
+          description: Обновлённая роль
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/roleResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+      - Roles
+      summary: Удаление роли
+      operationId: deleteRoleOguidV1
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+components:
+  schemas:
+    fileBinary:
+      description: Файл в виде массива байт
+      type: string
+      format: binary
+    objectPut:
+      type: object
+      required:
+      - fields
+      properties:
+        fields:
+          allOf:
+          - description: Необходимо передавать полный состав полей
+          - $ref: '#/components/schemas/objectFieldsRequest'
+    objectFieldResponse:
+      oneOf:
+      - $ref: '#/components/schemas/objectSimpleFieldResponse'
+      - type: array
+        items:
+          $ref: '#/components/schemas/objectSimpleFieldResponse'
+    objectSimpleFieldResponse:
+      oneOf:
+      - $ref: '#/components/schemas/dictKeyValueResponse'
+      - $ref: '#/components/schemas/objectShort'
+      - $ref: '#/components/schemas/DepartmentShort'
+      - $ref: '#/components/schemas/folderResponse'
+      - type: number
+      - type: string
+        nullable: true
+      - type: boolean
+    objectFieldsResponse:
+      type: object
+      description: Метаданные полей объекта для чтения
+      nullable: true
+      additionalProperties:
+        $ref: '#/components/schemas/objectFieldResponse'
+      example:
+        lineNumber: 1
+        vat: vat18
+        sum: 12345.5534
+        currency: RUR
+        isPaid: true
+        datePaid: 121231234
+        costCenter:
+          key: costCenter1
+          value: costCenterValue1
+    allowedActions:
+      type: array
+      items:
+        type: string
+        enum:
+        - START_PROCESS
+        - STOP_PROCESS
+        - SIGN
+        - DECLINE_SIGN
+        - APPROVE
+        - DECLINE_APPROVE
+        - MODIFY
+        - DELETE
+    hasFile:
+      type: boolean
+      nullable: false
+      description: Признак того, что у объекта есть файл
+    objectResponse:
+      type: object
+      required:
+      - oguid
+      - workflowStarted
+      - workflowCompleted
+      - workflowStageType
+      - workflowState
+      - workflowResult
+      - workflowStageLabel
+      - workflowStageToDoHint
+      - round
+      - indexKey
+      - itemType
+      - fields
+      - allowedActions
+      - hasFile
+      properties:
+        oguid:
+          allOf:
+          - $ref: '#/components/schemas/oguid'
+          description: GUID объекта
+        workflowStarted:
+          allOf:
+          - $ref: '#/components/schemas/dateTime'
+          description: Дата и время старта последнего процесса согласования
+        workflowCompleted:
+          allOf:
+          - $ref: '#/components/schemas/dateTime'
+          description: Дата и время завершения последнего процесса согласования
+        workflowStageType:
+          $ref: '#/components/schemas/workflowStageType'
+        workflowState:
+          $ref: '#/components/schemas/workflowObjectState'
+        workflowResult:
+          $ref: '#/components/schemas/workflowObjectResult'
+        workflowStageLabel:
+          $ref: '#/components/schemas/workflowStageLabel'
+        workflowStageToDoHint:
+          $ref: '#/components/schemas/workflowStageToDoHint'
+        round:
+          $ref: '#/components/schemas/round'
+        indexKey:
+          type: number
+          description: Ключ объекта для итерационных выборок объектов
+        itemType:
+          $ref: '#/components/schemas/itemTypeKey'
+        fields:
+          allOf:
+          - nullable: false
+          - $ref: '#/components/schemas/objectFieldsResponse'
+        allowedActions:
+          $ref: '#/components/schemas/allowedActions'
+        hasFile:
+          $ref: '#/components/schemas/hasFile'
+    objectGetSingle:
+      type: object
+      additionalProperties: false
+      required:
+      - oguid
+      - workflowStarted
+      - workflowCompleted
+      - workflowStageType
+      - workflowState
+      - workflowResult
+      - workflowStageLabel
+      - workflowStageToDoHint
+      - round
+      - itemType
+      - fields
+      - allowedActions
+      - tasks
+      - workflowStagesCurrentNumber
+      - workflowStagesTotalCount
+      - attachmentOguid
+      properties:
+        oguid:
+          allOf:
+          - $ref: '#/components/schemas/oguid'
+          description: GUID объекта
+        workflowStarted:
+          allOf:
+          - $ref: '#/components/schemas/dateTime'
+          description: Дата и время старта последнего процесса согласования
+        workflowCompleted:
+          allOf:
+          - $ref: '#/components/schemas/dateTime'
+          description: Дата и время завершения последнего процесса согласования
+        workflowStageType:
+          $ref: '#/components/schemas/workflowStageType'
+        workflowState:
+          $ref: '#/components/schemas/workflowObjectState'
+        workflowResult:
+          $ref: '#/components/schemas/workflowObjectResult'
+        workflowStageLabel:
+          $ref: '#/components/schemas/workflowStageLabel'
+        workflowStageToDoHint:
+          $ref: '#/components/schemas/workflowStageToDoHint'
+        round:
+          $ref: '#/components/schemas/round'
+        itemType:
+          $ref: '#/components/schemas/itemTypeKey'
+        fields:
+          $ref: '#/components/schemas/objectFieldsResponse'
+        allowedActions:
+          $ref: '#/components/schemas/allowedActions'
+        tasks:
+          description: Активные задачи пользователя
+          type: array
+          items:
+            type: object
+            required:
+            - oguid
+            - type
+            properties:
+              oguid:
+                $ref: '#/components/schemas/oguid'
+              type:
+                $ref: '#/components/schemas/workflowTaskType'
+        workflowStagesCurrentNumber:
+          type: number
+          description: |
+            Номер текущего/последнего этапа согласования.
+
+            * Нумерация этапов с 1.
+
+            * Если процесс согласования завершен, выводится номер последнего этапа последнего процесса
+
+          example: 2
+        workflowStagesTotalCount:
+          type: number
+          description: |
+            Всего этапов согласования.
+
+            Если процесс согласования завершен, выводится количество этапов последнего процесса.
+
+          example: 3
+        attachmentOguid:
+          allOf:
+          - $ref: '#/components/schemas/oguid'
+          nullable: true
+          description: main object file `oguid`
+    objectFieldRequest:
+      oneOf:
+      - $ref: '#/components/schemas/objectFieldSimpleRequest'
+      - type: array
+        items:
+          $ref: '#/components/schemas/objectFieldSimpleRequest'
+    objectFieldSimpleRequest:
+      oneOf:
+      - type: number
+        example: 123.456
+      - type: string
+        pattern: ^([\p{N}\p{L}\p{S}\p{P}\p{Z}]){0,2000}$
+        example: Обычная строка
+        nullable: true
+      - type: boolean
+      - $ref: '#/components/schemas/dictKey'
+      - $ref: '#/components/schemas/oguid'
+    objectFieldsRequest:
+      type: object
+      description: Метаданные полей объекта для записи
+      nullable: false
+      additionalProperties:
+        $ref: '#/components/schemas/objectFieldRequest'
+      example:
+        lineNumber: 1
+        costAccount: null
+        vat: vat18
+        sum: 12345.5534
+        currency: RUR
+        isPaid: true
+        datePaid: 121231234
+    objectRequest:
+      type: object
+      required:
+      - itemType
+      - fields
+      - signedContent
+      properties:
+        itemType:
+          allOf:
+          - $ref: '#/components/schemas/itemTypeKey'
+          description: Тип объекта, согласно справочнику типов объектов
+        fields:
+          $ref: '#/components/schemas/objectFieldsRequest'
+        signedContent:
+          $ref: '#/components/schemas/signedContent'
+    signedContent:
+      type: object
+      nullable: true
+      required:
+      - fileOguid
+      properties:
+        isEncryptedContent:
+          description: Контент зашифрован
+          type: boolean
+          default: false
+          nullable: true
+        fileOguid:
+          allOf:
+          - $ref: '#/components/schemas/uploadedFileOguid'
+          description: content file `oguid`
+        signatureOguid:
+          allOf:
+          - $ref: '#/components/schemas/uploadedFileOguid'
+          description: Signature `oguid`
+        powerOfAttorney:
+          $ref: '#/components/schemas/powerOfAttorney'
+    powerOfAttorney:
+      type: object
+      nullable: true
+      description: attorneyNumber и attorneyDate для type = PAPER, DIGITAL - not null
+      required:
+      - attorneyNumber
+      - attorneyDateTime
+      - type
+      properties:
+        attorneyNumber:
+          type: string
+          nullable: true
+        attorneyDateTime:
+          $ref: '#/components/schemas/dateTime'
+        type:
+          nullable: false
+          type: string
+          enum:
+          - PAPER
+          - DIGITAL
+          - OTHER
+        additionalInfo:
+          type: string
+          nullable: true
+        id:
+          type: string
+          nullable: true
+    workflowObjectState:
+      description: Этап внутреннего документооброта
+      nullable: true
+      type: string
+      enum:
+      - NOT_STARTED
+      - IN_PROGRESS
+      - COMPLETED
+      - null
+      readOnly: true
+      example: NOT_STARTED
+    workflowObjectResult:
+      description: Результат выполнения согласования
+      nullable: true
+      type: string
+      enum:
+      - SOLVED
+      - DECLINED
+      - STOPPED
+      - ERROR
+      - null
+      readOnly: true
+      example: SOLVED
+    workflowStageLabel:
+      allOf:
+      - $ref: '#/components/schemas/userText2000N'
+      description: Наименование этапа
+      default: null
+      example: Согласование
+    workflowStageToDoHint:
+      allOf:
+      - $ref: '#/components/schemas/userText2000N'
+      description: Подсказка, объясняющая пользователю необходимые действия
+      example: Подпишите объект
+    workflowStageIsBackToBeginIfDecline:
+      type: boolean
+      description: Этап является вехой
+      default: false
+    workflowStageType:
+      description: Этап утверждения
+      type: string
+      nullable: true
+      example: ACQUAINTANCE
+    workflowTaskType:
+      description: Группа этапов
+      type: string
+      enum:
+      - APPROVAL
+      - SIGNING
+      - ACQUAINTANCE
+      - TODO
+      example: APPROVAL
+    round:
+      type: integer
+      description: Номер итерации в случае повторения процесса
+      nullable: true
+      default: 1
+      minimum: 1
+    workflowMapRequest:
+      type: object
+      nullable: true
+      required:
+      - stages
+      additionalProperties: false
+      properties:
+        stages:
+          type: array
+          minItems: 1
+          maxItems: 100
+          nullable: true
+          description: Этапы
+          items:
+            type: object
+            required:
+            - isBackToBeginIfDecline
+            - type
+            - userName
+            - toDoHint
+            - assignees
+            additionalProperties: false
+            properties:
+              isBackToBeginIfDecline:
+                $ref: '#/components/schemas/workflowStageIsBackToBeginIfDecline'
+              type:
+                $ref: '#/components/schemas/workflowStageType'
+              userName:
+                $ref: '#/components/schemas/workflowStageLabel'
+              toDoHint:
+                $ref: '#/components/schemas/workflowStageToDoHint'
+              assignees:
+                type: array
+                minItems: 1
+                maxItems: 10000
+                description: Список участников с условиями
+                items:
+                  type: object
+                  description: |
+                    Одно и только одно из полей должно быть заполнено:
+
+                    * `assignedToUserOguid` - указанный пользователь, assignMode должен быть *null*
+                  required:
+                  - startConditions
+                  - assignedToUserOguid
+                  additionalProperties: false
+                  properties:
+                    startConditions:
+                      $ref: '#/components/schemas/startConditionsRequest'
+                    assignedToUserOguid:
+                      $ref: '#/components/schemas/assignedToUserOguid'
+    startConditionsRequest:
+      type: array
+      nullable: true
+      minItems: 0
+      maxItems: 100
+      description: 'Условия старта.
+
+        Маршрут проходит проверку на соответствие объекту, если выполняются **все**
+        указанные условия. За исключением:
+
+        * если у данного типа объекта отсутствует указанное в маршруте поля - проверка
+        пройдена
+
+        * если startConditions равен null или пустому массиву - проверка пройдена
+
+
+        **Важно!** Не все сочетания полей и операторов валидны:
+
+        * операции на больше-меньше валидны только для дат и чисел
+
+        * like, %like, like% валидны только для строк
+
+        '
+      items:
+        type: object
+        required:
+        - code
+        - operator
+        - value
+        additionalProperties: false
+        properties:
+          code:
+            type: string
+            description: 'Код поля:
+
+
+              Может принимать значения:
+
+              * коды fields данной организации
+
+
+              Производится проверка: присутствует ли заявленное поле в списке полей организации.
+
+              '
+          operator:
+            type: string
+            description: 'Операторы делятся на типы:
+
+              * isnull, isnotnull - не принимают аргументов
+
+              * eq, ne, lt, le, ge, gt - принимает значение  { "value" : 100.500 }
+
+              * in, like, like%, %like - принимает массив значений { "value" : [ "dictKey" ] }
+
+              '
+            enum:
+            - isnull
+            - isnotnull
+            - eq
+            - ne
+            - lt
+            - gt
+            - le
+            - ge
+            - in
+            - like
+            - '%like'
+            - like%
+          value:
+            description: 'Тип значения должен соответствовать типу поля:
+
+              * для строковых и dict.key - строка
+
+              * для сумм передается число,
+
+              * для isPaid - булево
+
+              '
+            oneOf:
+            - type: array
+              items:
+                $ref: '#/components/schemas/objectFieldRequest'
+            - $ref: '#/components/schemas/objectFieldRequest'
+      example:
+      - code: sumTotal
+        operator: ge
+        value: 1234.56
+      - code: sumTotal
+        operator: le
+        value: 6543.12
+      - code: contractor
+        operator: eq
+        value: 28b87807-a2a5-4783-aef6-06bf698beb00
+      - code: costCenter
+        operator: in
+        value:
+        - costCenterKey1
+        - costCenterKey2
+        - costCenterKey3
+      - code: objectNumber
+        operator: like
+        value:
+        - '000'
+        - '001'
+        - '002'
+    assignedToUserOguid:
+      allOf:
+      - $ref: '#/components/schemas/oguid'
+      description: Кому назначено
+      default: null
+    startConditionsResponse:
+      type: array
+      nullable: true
+      minItems: 0
+      maxItems: 100
+      description: 'Условия старта.
+
+        Маршрут проходит проверку на соответствие объекту, если выполняются **все** указанные условия. За ислючением:
+
+        * если у данного типа объекта отсутствует указанное в маршруте поля - проверка пройдена
+
+        * если startConditions равен null или пустому массиву - проверка пройдена
+
+        '
+      items:
+        type: object
+        required:
+        - code
+        - operator
+        - value
+        additionalProperties: false
+        properties:
+          code:
+            $ref: '#/components/schemas/fieldKey'
+          operator:
+            type: string
+            description: 'Операторы делятся на типы:
+
+              * isnull, isnotnull - не имеют аргументов
+
+              * eq, ne, lt, le, ge, gt - аргумент - значение  { "value" : 100.500 }
+
+              * in - аргумент - массив значений { "value" : [ "dictKey" ] }
+
+
+              Тип возвращаемого значения
+
+              * для простых типов fields (number, string) передается значение соответствующего типа
+
+              * для дат передается дата в виде числа в оговоренном формате
+
+              * для значений справочника передается объект c key|value
+
+              * для контрагента - структура orgShort
+
+              '
+            enum:
+            - isnull
+            - isnotnull
+            - eq
+            - ne
+            - lt
+            - gt
+            - le
+            - ge
+            - in
+            - like
+            - '%like'
+            - like%
+          value:
+            oneOf:
+            - type: array
+              items:
+                $ref: '#/components/schemas/objectFieldResponse'
+            - $ref: '#/components/schemas/objectFieldResponse'
+      example:
+      - code: sumTotal
+        operator: ge
+        value: 1234.56
+      - code: sumTotal
+        operator: le
+        value: 6543.12
+      - code: costCenter
+        operator: in
+        value:
+        - key: costCenterKey1
+          value: costCenterValue1
+        - key: costCenterKey2
+          value: costCenterValue2
+        - key: costCenterKey3
+          value: costCenterValue4
+      - code: objectNumber
+        operator: like
+        value:
+        - '000'
+        - '001'
+        - '002'
+    objectTypeResponse:
+      allOf:
+      - type: object
+        required:
+        - key
+        - name
+        - description
+        - isFileType
+        - isSystem
+        - shortItemInfo
+        - isMenuItem
+        - customProperties
+        additionalProperties: false
+        properties:
+          key:
+            $ref: '#/components/schemas/objectTypeKey'
+          name:
+            $ref: '#/components/schemas/objectTypeName'
+          description:
+            $ref: '#/components/schemas/objectTypeDescription'
+          isFileType:
+            $ref: '#/components/schemas/ObjectTypeIsFileType'
+          isSystem:
+            $ref: '#/components/schemas/ObjectTypeIsSystem'
+          shortItemInfo:
+            $ref: '#/components/schemas/shortItemInfoRequest'
+      - $ref: '#/components/schemas/objectTypeMenuProps'
+    urlFriendlyKey:
+      type: string
+      description: Ключ поля
+      pattern: ^([A-Za-z0-9._-]){1,40}$
+      example: key
+    objectTypeKey:
+      allOf:
+        - $ref: '#/components/schemas/urlFriendlyKey'
+      description: Ключ поля
+      example: BILL
+    itemTypeKey:
+      allOf:
+        - $ref: '#/components/schemas/urlFriendlyKey'
+      description: Ключ item-типа
+      example: invoiceHeader
+    itemTypeResponse:
+      type: object
+      required:
+      - oguid
+      - key
+      - name
+      - description
+      - fields
+      properties:
+        oguid:
+          $ref: '#/components/schemas/oguid'
+        key:
+          $ref: '#/components/schemas/objectTypeKey'
+        name:
+          $ref: '#/components/schemas/itemTypeName'
+        description:
+          $ref: '#/components/schemas/itemTypeDescription'
+        fields:
+          type: array
+          description: '`null` value means that all `fields` are included
+
+            '
+          items:
+            $ref: '#/components/schemas/fieldKey'
+          nullable: true
+    fieldResponse:
+      type: object
+      required:
+      - key
+      - name
+      - description
+      - type
+      - referenceObjectType
+      - isArray
+      - selectList
+      - parentFieldKey
+      additionalProperties: false
+      properties:
+        key:
+          $ref: '#/components/schemas/fieldKey'
+        name:
+          $ref: '#/components/schemas/fieldName'
+        description:
+          $ref: '#/components/schemas/fieldDescription'
+        type:
+          $ref: '#/components/schemas/fieldType'
+        referenceObjectType:
+          type: object
+          required:
+          - appOguid
+          - key
+          properties:
+            appOguid:
+              allOf:
+              - $ref: '#/components/schemas/oguid'
+              nullable: true
+              description: '`null` value means current app, `non-null` value means foreign app
+
+                '
+            key:
+              $ref: '#/components/schemas/fieldObjectTypeN'
+        isArray:
+          $ref: '#/components/schemas/fieldIsArray'
+        selectList:
+          $ref: '#/components/schemas/SelectList'
+        parentFieldKey:
+          allOf:
+          - $ref: '#/components/schemas/fieldKey'
+          description: Parent field for selects
+          nullable: true
+    fieldKey:
+      allOf:
+        - $ref: '#/components/schemas/urlFriendlyKey'
+      description: Ключ поля
+      example: sumTotal
+    fieldIsArray:
+      description: Признак того, что поле принимает массив значений
+      type: boolean
+      default: false
+    fieldType:
+      description: Тип данных
+      type: string
+      enum:
+      - NUMBER
+      - CURRENCY
+      - STRING
+      - DATE
+      - DATETIME
+      - BOOLEAN
+      - SELECT
+      - REFERENCE_OBJECT
+      - GROUP
+      - TABLE
+      example: STRING
+    dictKey:
+      type: string
+      description: Ключ значения справочника
+      pattern: ^([\p{L}\p{N}@._-]){1,50}$
+      example: DictValueKey
+    isUserAdmin:
+      type: boolean
+      description: Defines whether user has administrative level access
+      example: true
+    roleOguid:
+      allOf:
+      - $ref: '#/components/schemas/oguid'
+      description: Идентификатор роли
+    dictValue:
+      allOf:
+      - $ref: '#/components/schemas/userText2000'
+      description: Значение справочника
+      example: Dict Value
+    dateTime:
+      description: Дата и время
+      type: string
+      format: YYYY-MM-DDThh:mm:ss±hh
+      nullable: false
+      example: '2013-02-25T18:25:10+03'
+    departmentName:
+      allOf:
+      - $ref: '#/components/schemas/userText255'
+      description: Department name
+      example: Head Office
+    roleName:
+      allOf:
+      - $ref: '#/components/schemas/userText255'
+      description: Role name
+      example: Manager
+    oguid:
+      type: string
+      format: uuid
+      example: 875051bc-15e4-497a-91ec-1ef939a9b053
+    ApiRestResponse500:
+      allOf:
+      - type: object
+        example:
+          error: Internal server error
+          timestamp: 1573803198508
+          message: Internal server error
+          correlationId: 875051bc-15e4-497a-91ec-1ef939a9b053
+          debugMessage: Internal server error
+      - $ref: '#/components/schemas/ApiRestResponse'
+      - type: object
+        example:
+          error: Internal server error
+          timestamp: 1573803198508
+          message: Internal server error
+          correlationId: 875051bc-15e4-497a-91ec-1ef939a9b053
+          debugMessage: Internal server error
+    ApiRestResponse:
+      description: Структура для использования в ответах от сервера, если статус запроса будет != 200
+      type: object
+      required:
+      - timestamp
+      - correlationId
+      - error
+      - message
+      - errorCode
+      - debugMessage
+      properties:
+        timestamp:
+          type: number
+          format: int64
+          example: 1573803198508
+        correlationId:
+          type: string
+        error:
+          type: string
+          description: Тип ошибки, дублирует HttpStatus
+          example: Bad request
+        message:
+          type: string
+          description: Текст ошибки для конечного пользователя
+        errorCode:
+          type: string
+          enum:
+          - UNSPECIFIED
+          - IP_RESTRICTION
+        debugMessage:
+          type: string
+          nullable: true
+          description: Отладочная информация для разработчиков клиента
+    dictKeyValueResponse:
+      type: object
+      description: Значение справочника
+      nullable: true
+      required:
+      - key
+      - value
+      additionalProperties: false
+      properties:
+        key:
+          $ref: '#/components/schemas/dictKey'
+        value:
+          $ref: '#/components/schemas/dictValue'
+    uploadedFileOguid:
+      allOf:
+      - $ref: '#/components/schemas/oguid'
+      description: OGUID загруженного файла с подписью
+    fieldObjectTypeN:
+      allOf:
+        - $ref: '#/components/schemas/urlFriendlyKey'
+      description: Тип справочника
+      nullable: true
+      example: costCenter
+      default: null
+    objectShort:
+      type: object
+      required:
+      - oguid
+      - itemType
+      - itemTypeName
+      - fields
+      - expression
+      properties:
+        oguid:
+          $ref: '#/components/schemas/oguid'
+        fields:
+          $ref: '#/components/schemas/objectFieldsResponse'
+    itemTypeSimple:
+      type: object
+      required:
+      - name
+      - fields
+      properties:
+        name:
+          $ref: '#/components/schemas/itemTypeName'
+        description:
+          $ref: '#/components/schemas/itemTypeDescription'
+        fields:
+          type: array
+          items:
+            type: object
+            required:
+            - key
+            additionalProperties: false
+            properties:
+              key:
+                $ref: '#/components/schemas/fieldKey'
+    appUserRequest:
+      type: object
+      required:
+      - roleOguid
+      - isAdmin
+      additionalProperties: false
+      properties:
+        roleOguid:
+          $ref: '#/components/schemas/roleOguid'
+        isAdmin:
+          $ref: '#/components/schemas/isUserAdmin'
+    appUserResponse:
+      type: object
+      required:
+      - user
+      - department
+      - role
+      - isAdmin
+      additionalProperties: false
+      properties:
+        user:
+          $ref: '#/components/schemas/userShort'
+        department:
+          $ref: '#/components/schemas/DepartmentShort'
+        role:
+          type: object
+          required:
+          - oguid
+          - name
+          properties:
+            oguid:
+              $ref: '#/components/schemas/roleOguid'
+            name:
+              $ref: '#/components/schemas/roleName'
+        isAdmin:
+          $ref: '#/components/schemas/isUserAdmin'
+    itemTypeCreateRequest:
+      allOf:
+      - type: object
+        required:
+        - oguid
+        - key
+        properties:
+          oguid:
+            allOf:
+            - $ref: '#/components/schemas/oguid'
+            description: '`null` value means that a new `itemType` should be created, `non-null` updates a corresponding `itemType`
+
+              '
+            nullable: true
+          key:
+            $ref: '#/components/schemas/objectTypeKey'
+          name:
+            $ref: '#/components/schemas/itemTypeName'
+          description:
+            $ref: '#/components/schemas/itemTypeDescription'
+          fields:
+            description: '`null` value means that all `fields` are included
+
+              '
+            type: array
+            items:
+              $ref: '#/components/schemas/fieldKey'
+            nullable: true
+            default: null
+    DepartmentShort:
+      type: object
+      description: Organization department
+      required:
+      - oguid
+      - name
+      properties:
+        oguid:
+          $ref: '#/components/schemas/oguid'
+        name:
+          $ref: '#/components/schemas/departmentName'
+    userShort:
+      type: object
+      nullable: true
+      description: Пользователь без лишних полей
+      additionalProperties: false
+      required:
+      - oguid
+      - firstName
+      - lastname
+      - middleName
+      - patronymic
+      - position
+      - email
+      properties:
+        oguid:
+          allOf:
+          - nullable: false
+          - $ref: '#/components/schemas/oguid'
+          - example: 7f421717-6a80-4b19-8673-a2fe1ea51890
+          - nullable: false
+        firstName:
+          $ref: '#/components/schemas/firstName'
+        lastname:
+          $ref: '#/components/schemas/lastName'
+        middleName:
+          $ref: '#/components/schemas/middleNameN'
+        position:
+          $ref: '#/components/schemas/position'
+        email:
+          allOf:
+          - $ref: '#/components/schemas/email'
+          nullable: true
+    nameString:
+      type: string
+      pattern: ^([\p{L} .@_-]){1,255}$
+    firstName:
+      allOf:
+      - $ref: '#/components/schemas/nameString'
+      description: First name
+      example: John
+    lastName:
+      allOf:
+      - $ref: '#/components/schemas/nameString'
+      description: Last name
+      example: Doe
+    middleNameN:
+      allOf:
+      - $ref: '#/components/schemas/nameString'
+      nullable: true
+      description: Middle name
+      example: Johnson
+    email:
+      type: string
+      nullable: false
+      maxLength: 150
+      pattern: ^([A-Za-z0-9._-])+@([A-Za-z0-9._-])+\.([A-Za-z]{2,63})$
+      example: example@gmail.com
+      description: Электронная почта
+      default: null
+    position:
+      allOf:
+      - $ref: '#/components/schemas/userText2000N'
+      description: Должность
+      example: Начальник Камчатки
+    userText2000:
+      type: string
+      description: User text
+      pattern: ^([\p{L}\p{N}\p{S}\p{P}\p{Z}]){1,2000}$
+      example: Длинный текст
+    userText2000N:
+      allOf:
+      - $ref: '#/components/schemas/userText2000'
+      nullable: true
+      default: null
+      example: Длинный текст
+    userText255:
+      type: string
+      description: User text
+      nullable: true
+      pattern: ^([\p{L}\p{N}\p{S}\p{P}\p{Z}]){1,255}$
+      example: Короткий текст
+    SelectList:
+      type: array
+      nullable: true
+      items:
+        type: object
+        required:
+        - key
+        - value
+        - parentKey
+        additionalProperties: false
+        properties:
+          key:
+            $ref: '#/components/schemas/dictKey'
+          value:
+            $ref: '#/components/schemas/dictValue'
+          parentKey:
+            $ref: '#/components/schemas/dictKey'
+      default: null
+    objectTypeMenuProps:
+      type: object
+      properties:
+        isMenuItem:
+          type: boolean
+          description: Object type is shown as a separate item in the navigation menu
+          default: false
+          nullable: false
+        customProperties:
+          type: object
+          description: Custom JSON properties attached to this object type
+          nullable: true
+          default: null
+          additionalProperties: true
+    objectTypeCreateRequest:
+      allOf:
+      - type: object
+        additionalProperties: false
+        required:
+        - key
+        properties:
+          key:
+            $ref: '#/components/schemas/objectTypeKey'
+      - $ref: '#/components/schemas/objectTypeBaseRequest'
+    objectTypeUpdateRequest:
+      allOf:
+      - type: object
+        additionalProperties: false
+        required:
+        - key
+        properties:
+          key:
+            $ref: '#/components/schemas/objectTypeKey'
+      - $ref: '#/components/schemas/objectTypeBaseRequest'
+    objectTypeBaseRequest:
+      allOf:
+      - type: object
+        required:
+        - name
+        - shortItemInfo
+        additionalProperties: false
+        properties:
+          name:
+            $ref: '#/components/schemas/objectTypeName'
+          description:
+            $ref: '#/components/schemas/objectTypeDescription'
+          isFileType:
+            $ref: '#/components/schemas/ObjectTypeIsFileType'
+          shortItemInfo:
+            $ref: '#/components/schemas/shortItemInfoRequest'
+      - $ref: '#/components/schemas/objectTypeMenuProps'
+    shortItemInfoRequest:
+      type: object
+      required:
+      - fields
+      - itemNameExpression
+      properties:
+        fields:
+          type: array
+          minItems: 1
+          description: |
+            field names should correspond the structure 
+            * `%fieldName%` - for simple fields
+            * `%objectFieldName%.%foreignFieldName%` - for object links. NOTE: only one level is allowed
+          items:
+            $ref: '#/components/schemas/shortItemInfoFieldsRequest'
+        itemNameExpression:
+          $ref: '#/components/schemas/shortItemExpression'
+    shortItemExpression:
+      type: string
+      description: "an expression for the client in the following format: `%itemType.Name% № %docNumber% от %docDate`"
+      example: "`%itemType.Name% № %docNumber% от %docDate%`"
+    shortItemInfoFieldsRequest:
+      type: object
+      required:
+      - key
+      - additionalInfo
+      properties:
+        key:
+          $ref: '#/components/schemas/fieldKey'
+        additionalInfo:
+          type: string
+          enum:
+          - NONE
+          - WITH_FIELD_NAME
+          - NO_FIELD_NAME
+    ObjectTypeIsSystem:
+      type: boolean
+      description: Indicates whether the object type is system
+    ObjectTypeIsFileType:
+      type: boolean
+      description: Файловый тип объекта
+    PolicyEntryRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - oguid
+      oneOf:
+      - required:
+        - role
+      - required:
+        - userOguid
+      properties:
+        oguid:
+          allOf:
+          - $ref: '#/components/schemas/oguid'
+          nullable: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/roleOguid'
+          nullable: true
+          default: null
+        userOguid:
+          allOf:
+          - $ref: '#/components/schemas/oguid'
+          nullable: true
+          default: null
+        visibility:
+          $ref: '#/components/schemas/VisibilitySettingRequest'
+        create:
+          $ref: '#/components/schemas/CreateSetting'
+        fieldsWriteable:
+          allOf:
+          - $ref: '#/components/schemas/FieldsWriteableSettingRequest'
+          default:
+            value: OWNER
+        fieldsVisibility:
+          allOf:
+          - $ref: '#/components/schemas/FieldsVisibilitySettingRequest'
+          default:
+            value: VISIBLE_ALL
+        delete:
+          $ref: '#/components/schemas/DeleteSetting'
+        downloadFile:
+          $ref: '#/components/schemas/DownloadFileSetting'
+        createFolder:
+          $ref: '#/components/schemas/CreateFolderSetting'
+    PolicyEntryResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - oguid
+      - role
+      - user
+      - additionalPolicies
+      - visibility
+      - create
+      - fieldsWriteable
+      - fieldsVisibility
+      - delete
+      - downloadFile
+      properties:
+        oguid:
+          $ref: '#/components/schemas/oguid'
+        role:
+          $ref: '#/components/schemas/roleOguid'
+        user:
+          allOf:
+          - $ref: '#/components/schemas/userShort'
+          nullable: true
+        visibility:
+          $ref: '#/components/schemas/VisibilitySettingResponse'
+        create:
+          $ref: '#/components/schemas/CreateSetting'
+        fieldsWriteable:
+          $ref: '#/components/schemas/FieldsWriteableSettingResponse'
+        fieldsVisibility:
+          $ref: '#/components/schemas/FieldsVisibilitySettingResponse'
+        delete:
+          $ref: '#/components/schemas/DeleteSetting'
+        downloadFile:
+          $ref: '#/components/schemas/DownloadFileSetting'
+        createFolder:
+          $ref: '#/components/schemas/CreateFolderSetting'
+    VisibilitySettingRequest:
+      type: object
+      oneOf:
+      - required:
+        - value
+      - required:
+        - value
+        - filter
+      additionalProperties: false
+      properties:
+        value:
+          type: string
+          enum:
+          - OWN_OBJECTS
+          - ALL_OBJECTS
+          - FILTER
+        filter:
+          $ref: '#/components/schemas/VisibilityFilterRequest'
+      description: If **value = FILTER** ⇒ **filter** object is mandatory.
+      default:
+        value: OWN_OBJECTS
+    VisibilitySettingResponse:
+      type: object
+      required:
+      - value
+      - filter
+      additionalProperties: false
+      properties:
+        value:
+          type: string
+          enum:
+          - OWN_OBJECTS
+          - ALL_OBJECTS
+          - FILTER
+        filter:
+          $ref: '#/components/schemas/VisibilityFilterResponse'
+      description: If **value = FILTER** ⇒ **filter** object is mandatory.
+    VisibilityFilterRequest:
+      type: object
+      required:
+      - filterRules
+      additionalProperties: false
+      properties:
+        filterRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterRuleRequest'
+    VisibilityFilterResponse:
+      type: object
+      required:
+      - filterRules
+      additionalProperties: false
+      properties:
+        filterRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterRuleResponse'
+    FilterRuleRequest:
+      type: object
+      required:
+      - type
+      oneOf:
+      - required:
+        - isNeedToExcludeChild
+        - specifiedOguids
+      - required:
+        - expression
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          enum:
+          - USER_DEPARTMENT
+          - SPECIFIED_DEPARTMENTS
+          - SPECIFIED_FOLDER
+          - EXPRESSION
+        isNeedToExcludeChild:
+          type: integer
+          default: 0
+          description: 0 = include child entities (default) · 1 = exclude children
+        specifiedOguids:
+          type: array
+          items:
+            $ref: '#/components/schemas/oguid'
+          description: Needed when **type** is *SPECIFIED_DEPARTMENTS* or *SPECIFIED_FOLDER*
+        expression:
+          $ref: '#/components/schemas/filterWithOperatorRequest'
+    FilterRuleResponse:
+      type: object
+      required:
+      - type
+      - isNeedToExcludeChild
+      - specifiedOguids
+      - expression
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          enum:
+          - USER_DEPARTMENT
+          - SPECIFIED_DEPARTMENTS
+          - SPECIFIED_FOLDER
+          - EXPRESSION
+        isNeedToExcludeChild:
+          type: integer
+          default: 0
+          description: 0 = include child entities (default) · 1 = exclude children
+        specifiedOguids:
+          type: array
+          items:
+            $ref: '#/components/schemas/oguid'
+          description: Needed when **type** is *SPECIFIED_DEPARTMENTS* or *SPECIFIED_FOLDER*
+        expression:
+          $ref: '#/components/schemas/filterWithOperatorResponse'
+    CreateSetting:
+      type: object
+      required:
+      - value
+      additionalProperties: false
+      properties:
+        value:
+          type: string
+          enum:
+          - ALLOWED
+          - DENIED
+      default:
+        value: ALLOWED
+    FieldsWriteableSettingResponse:
+      allOf:
+      - $ref: '#/components/schemas/FieldsWriteableSetting'
+      - type: object
+        required:
+        - value
+        - isAllowedAll
+        - fieldKeys
+    FieldsWriteableSettingRequest:
+      allOf:
+      - $ref: '#/components/schemas/FieldsWriteableSetting'
+      - type: object
+        oneOf:
+        - required:
+          - value
+          - isAllowedAll
+        - required:
+          - value
+          - fieldKeys
+    FieldsWriteableSetting:
+      type: object
+      additionalProperties: false
+      properties:
+        value:
+          type: string
+          enum:
+          - OWNER
+          - ALLOWED
+        isAllowedAll:
+          type: boolean
+          description: |
+            Required when **value = ALLOWED**.  
+            *true*  – all fields writable;  
+            *false* – only **fieldKeys** are writable.
+        fieldKeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/fieldKey'
+          description: Required when **value = ALLOWED** **and** *isAllowedAll = false*
+    FieldsVisibilitySettingRequest:
+      allOf:
+      - $ref: '#/components/schemas/FieldsVisibilitySetting'
+      - type: object
+        oneOf:
+        - required:
+          - value
+        - required:
+          - value
+          - fieldKeys
+    FieldsVisibilitySettingResponse:
+      allOf:
+      - $ref: '#/components/schemas/FieldsVisibilitySetting'
+      - type: object
+        required:
+        - value
+        - fieldKeys
+    FieldsVisibilitySetting:
+      type: object
+      additionalProperties: false
+      properties:
+        value:
+          type: string
+          enum:
+          - VISIBLE_ALL
+          - HIDE_FIELDS
+        fieldKeys:
+          type: array
+          items:
+            type: string
+          description: Required when **value = HIDE_FIELDS**
+    DeleteSetting:
+      type: object
+      required:
+      - value
+      additionalProperties: false
+      properties:
+        value:
+          type: string
+          enum:
+          - OWNER
+          - ALLOWED
+      default:
+        value: OWNER
+    DownloadFileSetting:
+      type: object
+      required:
+      - value
+      additionalProperties: false
+      properties:
+        value:
+          type: string
+          enum:
+          - ALLOWED
+          - DENIED
+      default:
+        value: ALLOWED
+    CreateFolderSetting:
+      type: object
+      required:
+      - value
+      additionalProperties: false
+      properties:
+        value:
+          type: string
+          enum:
+          - ALLOWED
+          - DENIED
+      default:
+        value: ALLOWED
+    FilterRulesRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - filterRules
+      properties:
+        filterRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterRuleRequest'
+    FilterRulesResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - filterRules
+      properties:
+        filterRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterRuleResponse'
+    FieldKeyList:
+      type: array
+      description: List of field keys referenced in policies.
+      items:
+        $ref: '#/components/schemas/fieldKey'
+      default: null
+    filterWithOperatorRequest:
+      description: |
+        * the logical `AND` operation is applied to the separate expressions
+        * the logical `OR` operator is applied to the inner members of expressions
+        e.g. the following content:
+        ```
+        [
+          [
+            {
+              "code": "sumTotal",
+              "operator": "ge",
+              "value": 123
+            }
+          ],
+          [
+            {
+              "code": "sumTotal",
+              "operator": "le",
+              "value": 456
+            }
+          ],
+          [
+            {
+              "code": "department",
+              "operator": "eq",
+              "value": "oguid0"
+            },
+            {
+              "code": "department",
+              "operator": "eq",
+              "value": "oguid1"
+            }
+          ]
+        ]
+        ```
+        results in an expression:
+        `sumTotal >= 123 AND sumTotal <=456 AND (department = oguid0 OR department = oguid1)`
+      type: array
+      items:
+        $ref: '#/components/schemas/startConditionsRequest'
+    filterWithOperatorResponse:
+      nullable: true
+      type: array
+      items:
+        $ref: '#/components/schemas/startConditionsResponse'
+    fieldCreateRequest:
+      allOf:
+      - type: object
+        additionalProperties: false
+        required:
+        - key
+        properties:
+          key:
+            allOf:
+            - $ref: '#/components/schemas/fieldKey'
+      - $ref: '#/components/schemas/fieldBaseRequest'
+    fieldUpdateRequest:
+      allOf:
+      - type: object
+        additionalProperties: false
+        required:
+        - key
+        properties:
+          key:
+            allOf:
+            - $ref: '#/components/schemas/objectTypeKey'
+      - $ref: '#/components/schemas/fieldBaseRequest'
+    fieldBaseRequest:
+      type: object
+      required:
+      - name
+      - type
+      additionalProperties: false
+      properties:
+        name:
+          $ref: '#/components/schemas/fieldName'
+        description:
+          $ref: '#/components/schemas/fieldDescription'
+        type:
+          $ref: '#/components/schemas/fieldType'
+        isArray:
+          $ref: '#/components/schemas/fieldIsArray'
+        parentKey:
+          allOf:
+          - $ref: '#/components/schemas/fieldKey'
+          nullable: true
+          default: null
+        referenceObjectType:
+          type: object
+          required:
+          - key
+          properties:
+            appOguid:
+              allOf:
+              - $ref: '#/components/schemas/oguid'
+              nullable: true
+              description: |
+                `null` value means current app, `non-null` value means foreign app
+            key:
+              $ref: '#/components/schemas/fieldObjectTypeN'
+        selectList:
+          $ref: '#/components/schemas/SelectList'
+        parentFieldKey:
+          allOf:
+          - $ref: '#/components/schemas/fieldKey'
+          default: null
+          description: Parent field for selects
+          nullable: true
+    folderBase:
+      type: object
+      additionalProperties: false
+      required:
+      - name
+      properties:
+        name:
+          $ref: '#/components/schemas/folderName'
+        description:
+          $ref: '#/components/schemas/folderDescription'
+        icon:
+          type: integer
+          format: int32
+          nullable: true
+          description: Иконка папки
+          default: null
+        parentOguid:
+          allOf:
+          - $ref: '#/components/schemas/oguid'
+          description: OGUID родительской папки
+          nullable: true
+          default: null
+    folderRequest:
+      allOf:
+      - $ref: '#/components/schemas/folderBase'
+    folderResponse:
+      allOf:
+      - type: object
+        required:
+        - oguid
+        - description
+        - icon
+        - parentOguid
+        properties:
+          oguid:
+            $ref: '#/components/schemas/oguid'
+      - $ref: '#/components/schemas/folderBase'
+    objectTypeName:
+      allOf:
+      - $ref: '#/components/schemas/userText255'
+      description: Object type name
+      example: Invoice
+    objectTypeDescription:
+      allOf:
+      - $ref: '#/components/schemas/userText2000N'
+      description: Object type description
+      example: Description of the Invoice object type
+    itemTypeName:
+      allOf:
+      - $ref: '#/components/schemas/userText255'
+      description: Item type name
+      example: Document
+    itemTypeDescription:
+      allOf:
+      - $ref: '#/components/schemas/userText2000N'
+      description: Item type description
+      example: Description of the Document item type
+    fieldName:
+      allOf:
+      - $ref: '#/components/schemas/userText255'
+      description: Field name
+      example: DeliveryDate
+    fieldDescription:
+      allOf:
+      - $ref: '#/components/schemas/userText2000N'
+      description: Field description
+      example: Date when the delivery occurs
+    folderName:
+      allOf:
+      - $ref: '#/components/schemas/userText255'
+      description: Folder name
+      example: Contracts
+    folderDescription:
+      allOf:
+      - $ref: '#/components/schemas/userText2000N'
+      description: Folder description
+      example: Folder containing contract files
+    roleKey:
+      allOf:
+      - $ref: '#/components/schemas/objectTypeKey'
+      description: Role key
+    roleDescription:
+      allOf:
+        - $ref: '#/components/schemas/userText2000N'
+      description: Role description (up to 2 000 symbols).
+    roleBase:
+      type: object
+      additionalProperties: false
+      required:
+      - key
+      - name
+      - description
+      properties:
+        key:
+          $ref: '#/components/schemas/roleKey'
+        name:
+          $ref: '#/components/schemas/roleName'
+        description:
+          $ref: '#/components/schemas/roleDescription'
+    roleRequest:
+      allOf:
+      - type: object
+        required:
+        - oguid
+        - key
+        properties:
+          oguid:
+            allOf:
+            - $ref: '#/components/schemas/oguid'
+            description: '`null` — create new role · non-null — update existing role.'
+            nullable: true
+          key:
+            $ref: '#/components/schemas/roleKey'
+      - $ref: '#/components/schemas/roleBase'
+    roleResponse:
+      allOf:
+      - type: object
+        required:
+        - oguid
+        properties:
+          oguid:
+            $ref: '#/components/schemas/oguid'
+      - $ref: '#/components/schemas/roleBase'
+  parameters:
+    objectTypeKey:
+      in: path
+      name: objectTypeKey
+      required: true
+      schema:
+        $ref: '#/components/schemas/objectTypeKey'
+      description: Ключ типа объекта
+      example: BILL
+    itemTypeKey:
+      in: path
+      name: itemTypeKey
+      required: true
+      schema:
+        $ref: '#/components/schemas/itemTypeKey'
+      description: Ключ item-типа
+      example: invoiceHeader
+    acceptLanguage:
+      name: Accept-Language
+      in: header
+      required: false
+      schema:
+        type: string
+        default: en
+      description: Сообщает серверу, какая локаль предпочтительнее
+    orgOguid:
+      in: path
+      name: orgOguid
+      required: true
+      schema:
+        $ref: '#/components/schemas/oguid'
+      description: OGUID Организации
+      example: 28b87800-a2a5-4783-aef6-06bf698beb00
+    objectOguid:
+      in: path
+      name: objectOguid
+      required: true
+      schema:
+        $ref: '#/components/schemas/oguid'
+    objectAttachmentOguid:
+      in: path
+      name: objectAttachmentOguid
+      required: true
+      schema:
+        $ref: '#/components/schemas/oguid'
+    objectOnlyOguid:
+      in: path
+      name: objectIdOguid
+      required: true
+      schema:
+        $ref: '#/components/schemas/oguid'
+      description: OGUID объекта
+      example: 9c5ce759-fa5c-4e1d-88ac-034874f354fe
+    fieldKey:
+      in: path
+      name: fieldKey
+      required: true
+      schema:
+        $ref: '#/components/schemas/fieldKey'
+      description: Ключ поля
+      example: objectNumber
+    appOguid:
+      in: path
+      name: appOguid
+      required: true
+      schema:
+        $ref: '#/components/schemas/oguid'
+      description: Уникальный идентификатор приложения
+      example: 28b87800-a2a5-4783-aef6-06bf698beb00
+    userOguid:
+      in: path
+      name: userOguid
+      required: true
+      schema:
+        $ref: '#/components/schemas/oguid'
+      description: OGUID пользователя
+    accessOguid:
+      in: path
+      name: accessOguid
+      required: true
+      schema:
+        $ref: '#/components/schemas/oguid'
+      description: OGUID роли
+    folderOguid:
+      in: path
+      name: folderOguid
+      required: true
+      schema:
+        $ref: '#/components/schemas/oguid'
+      description: OGUID папки
+    roleOguid:
+      in: path
+      name: roleOguid
+      required: true
+      description: OGUID роли
+      schema:
+        $ref: '#/components/schemas/oguid'
+      example: 7e5dca0e-4d6f-4985-b9f2-0c68eb06e123
+  responses:
+    '204':
+      description: Пустой ответ успешно завершенной операции
+    '400':
+      description: Ответ с ошибкой 400, возвращается объект с кодом ошибки
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiRestResponse'
+    '403':
+      description: Ответ с ошибкой 403, возвращается объект с кодом ошибки
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiRestResponse'
+    '500':
+      description: Ответ с ошибкой 500, возвращается объект с кодом ошибки
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiRestResponse500'
+  securitySchemes:
+    accessToken:
+      in: header
+      type: apiKey
+      name: Access-Token
+      description: Access token
+security:
+- accessToken: []
