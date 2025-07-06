@@ -6,6 +6,6 @@
 - all properties should either have default value or be required in all POST request schemas, never both
 - overall check - in all the methods' requests & responses - all properties should either be required or have default value, never both
 - POST request properties' default values should be preserved after fixes implementation
-- if POST request property has a default value, it should NOT BE REQUIRED
+- if POST request property has a default value, it should be set as NOT REQUIRED
 - all current task **REQUIREMENTS** should be fulfilled
 - the specification should be valid
