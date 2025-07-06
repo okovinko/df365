@@ -87,7 +87,8 @@
 - ru_RU in Russian
 - en_US in English
 
-## Structure items
-- single log filter (OncePerRequestFilter):
-  - 
-- single exception handler which returns standardized message
+## Structure hints
+- single LoggingFilter (OncePerRequestFilter):
+  - gets correlationId from header or generates a random one, corresponding the specified pattern
+  - correlationId is added to MDC under `CORRELATION_ID_LOG_VAR = "correlationId"` (implement in constants) - this addition should be implemented in all child threads
+- single exception handler which returns standardized error structure (refer to spec) with localized message, taken from *.properties file
