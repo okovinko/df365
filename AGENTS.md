@@ -83,7 +83,7 @@
 
 ## Multi-lang environment
 ### Supported languages
-- `default` in English 
+- default in English 
 - ru_RU in Russian
 - en_US in English
 
