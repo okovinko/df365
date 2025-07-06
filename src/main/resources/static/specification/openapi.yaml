@@ -7,7 +7,7 @@ info:
   version: 1.0.0
   title: API Infologistics docuForce 365
 security:
-  - accessToken: [ ]
+  - BearerAuth: []
 tags:
   - name: Auth
     description: Operations related to auth
@@ -158,7 +158,7 @@ paths:
           $ref: '#/components/responses/400'
         '500':
           $ref: '#/components/responses/500'
-  /orgs/{orgOguid}:
+  /orgs/{orgGuid}:
     parameters:
       - $ref: '#/components/parameters/acceptLanguage'
       - $ref: '#/components/parameters/correlationId' # added to support request tracking
@@ -179,11 +179,12 @@ paths:
           $ref: '#/components/responses/400'
         '500':
           $ref: '#/components/responses/500'
-  /orgs/{orgOguid}/users:
+  /orgs/{orgGuid}/users:
     parameters:
       - $ref: '#/components/parameters/acceptLanguage'
       - $ref: '#/components/parameters/correlationId' # added to support request tracking
-      - $ref: '#/components/parameters/orgOguid'
+      - $ref: '#/components/parameters/orgGuid'
+          Смещение начала выборки
     summary: Organization user management
     get:
       summary: Get users list
@@ -225,7 +226,7 @@ paths:
           $ref: '#/components/responses/400'
         '500':
           $ref: '#/components/responses/500'
-  /orgs/{orgOguid}/users/{userOguid}:
+  /orgs/{orgGuid}/users/{userOguid}:
     parameters:
       - $ref: '#/components/parameters/acceptLanguage'
       - $ref: '#/components/parameters/correlationId' # added to support request tracking
@@ -304,7 +305,7 @@ paths:
           $ref: '#/components/responses/400'
         '500':
           $ref: '#/components/responses/500'
-  /orgs/{orgOguid}/availableModules:
+  /orgs/{orgGuid}/availableModules:
     parameters:
       - $ref: '#/components/parameters/acceptLanguage'
       - $ref: '#/components/parameters/correlationId' # added to support request tracking
@@ -327,7 +328,7 @@ paths:
           $ref: '#/components/responses/400'
         '500':
           $ref: '#/components/responses/500'
-  /orgs/{orgOguid}/apps:
+  /orgs/{orgGuid}/apps:
     parameters:
       - $ref: '#/components/parameters/acceptLanguage'
       - $ref: '#/components/parameters/correlationId' # added to support request tracking
@@ -372,7 +373,7 @@ paths:
           $ref: '#/components/responses/400'
         '500':
           $ref: '#/components/responses/500'
-  /orgs/{orgOguid}/apps/{appOguid}:
+  /orgs/{orgGuid}/apps/{appOguid}:
     parameters:
       - $ref: '#/components/parameters/acceptLanguage'
       - $ref: '#/components/parameters/correlationId' # added to support request tracking
@@ -534,7 +535,7 @@ paths:
           $ref: '#/components/responses/400'
         '500':
           $ref: '#/components/responses/500'
-  /orgs/{orgOguid}/departments:
+  /orgs/{orgGuid}/departments:
     parameters:
       - $ref: '#/components/parameters/acceptLanguage'
       - $ref: '#/components/parameters/correlationId' # added to support request tracking
@@ -579,7 +580,7 @@ paths:
           $ref: '#/components/responses/400'
         '500':
           $ref: '#/components/responses/500'
-  /orgs/{orgOguid}/departments/{departmentOguid}:
+  /orgs/{orgGuid}/departments/{departmentOguid}:
     parameters:
       - $ref: '#/components/parameters/acceptLanguage'
       - $ref: '#/components/parameters/correlationId' # added to support request tracking
@@ -635,7 +636,7 @@ paths:
           $ref: '#/components/responses/400'
         '500':
           $ref: '#/components/responses/500'
-  /orgs/{orgOguid}/logo:
+  /orgs/{orgGuid}/logo:
     parameters:
       - $ref: '#/components/parameters/acceptLanguage'
       - $ref: '#/components/parameters/correlationId' # added to support request tracking
@@ -1458,7 +1459,7 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/oguid'
-      description: Organization OGUID
+      description: Organization GUID
     userOguid:
       in: path
       name: userOguid
