@@ -1,4 +1,4 @@
-# AGENT.md — правила для Codex
+# OVERALL
 
 ## You're
 - a senior developer.
@@ -15,6 +15,7 @@
 - you **SHOULD NOT** provide a result, if HARD rules are not fulfilled; report failure instead
 
 ## Execution PLAN (you should uses deep step-by-step thinking for all the steps):
+0. You should ALWAYS implement a DEEP search that includes ALL THE DEPENDENCIES across hierarchy when executing the following tasks
 1. analyse the requirements, if any of the rules below hit, it is **ERROR IN TASK** issue:
    - contradict with each other
    - some requested changes cannot be implemented or result in breaking some HARD rules
@@ -52,3 +53,24 @@
 ## You may:
 - ask questions to clarify ambiguous points.
 
+# STACK
+## PRIMARY
+
+- **group:** `ru.infologistics.docuforce365`  
+- **artifact/name:** `shell`  
+- **Spring Boot:** `3.5.0`  
+- **packaging:** `jar`  
+- **Java:** `21`  
+- **builder:** `maven`  
+- **initVersion:** `0.0.1`
+
+## Requirements
+
+- Use Google-style Java guide.  
+- Use camel-case in YAML.  
+- Use `@Slf4j` for logging.  
+- Use Lombok for getters/setters/constructors.  
+- Store configuration in `application.yaml`.  
+- DB will be PostgreSQL (snake_case naming style).  
+- Follow best practices:  
+  - DRY (Don’t Repeat Yourself).  
