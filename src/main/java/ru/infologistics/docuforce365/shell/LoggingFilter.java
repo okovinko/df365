@@ -6,6 +6,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
@@ -39,9 +43,21 @@ public class LoggingFilter extends OncePerRequestFilter {
     }
     MDC.put(Coonsts.CORRELATION_ID_LOG_VAR, correlationId);
     response.setHeader(Coonsts.HEADER_CORRELATION_ID, correlationId);
+    Map<String, String> headers = Collections.list(request.getHeaderNames())
+        .stream()
+        .collect(Collectors.toMap(h -> h, request::getHeader, (a, b) -> b, LinkedHashMap::new));
+    String uri = request.getRequestURI();
+    String query = request.getQueryString();
+    String fullUri = query == null ? uri : uri + "?" + query;
+    log.debug("Incoming request {} {}", request.getMethod(), fullUri);
+    log.trace("Headers: {}", headers);
+    long start = System.currentTimeMillis();
     try {
       filterChain.doFilter(request, response);
     } finally {
+      long duration = System.currentTimeMillis() - start;
+      log.debug("Completed {} {} with status {} in {} ms", request.getMethod(), fullUri,
+          response.getStatus(), duration);
       MDC.remove(Coonsts.CORRELATION_ID_LOG_VAR);
     }
   }
