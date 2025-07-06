@@ -10,10 +10,12 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ru.infologistics.docuforce365.shell.RequestScopeBean;
 
 /**
  * Filter that enriches requests with correlation id and puts it in MDC
@@ -21,7 +23,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class LoggingFilter extends OncePerRequestFilter {
+  private final RequestScopeBean requestScopeBean;
   private static final char[] ALPHANUMERIC =
       "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".toCharArray();
   private static final SecureRandom RANDOM = new SecureRandom();
@@ -42,6 +46,7 @@ public class LoggingFilter extends OncePerRequestFilter {
       correlationId = generateCorrelationId();
     }
     MDC.put(Coonsts.CORRELATION_ID_LOG_VAR, correlationId);
+    requestScopeBean.setCorrelationId(correlationId);
     response.setHeader(Coonsts.HEADER_CORRELATION_ID, correlationId);
     Map<String, String> headers = Collections.list(request.getHeaderNames())
         .stream()
