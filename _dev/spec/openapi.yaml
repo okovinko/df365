@@ -440,7 +440,6 @@ paths:
             schema:
               type: object
               required:
-              - isFlowRequired
               - workflow
               - objects
               properties:
@@ -1172,7 +1171,6 @@ components:
       allOf:
       - $ref: '#/components/schemas/userText2000N'
       description: Наименование этапа
-      default: null
       example: Согласование
     workflowStageToDoHint:
       allOf:
@@ -1201,7 +1199,6 @@ components:
       type: integer
       description: Номер итерации в случае повторения процесса
       nullable: true
-      default: 1
       minimum: 1
     workflowMapRequest:
       type: object
@@ -1247,7 +1244,6 @@ components:
                     * `assignedToUserOguid` - указанный пользователь, assignMode должен быть *null*
                   required:
                   - startConditions
-                  - assignedToUserOguid
                   additionalProperties: false
                   properties:
                     startConditions:
@@ -1568,10 +1564,9 @@ components:
         - $ref: '#/components/schemas/urlFriendlyKey'
       description: Ключ поля
       example: sumTotal
-    fieldIsArray:
-      description: Признак того, что поле принимает массив значений
-      type: boolean
-      default: false
+  fieldIsArray:
+    description: Признак того, что поле принимает массив значений
+    type: boolean
     fieldType:
       description: Тип данных
       type: string
@@ -1866,7 +1861,6 @@ components:
       pattern: ^([A-Za-z0-9._-])+@([A-Za-z0-9._-])+\.([A-Za-z]{2,63})$
       example: example@gmail.com
       description: Электронная почта
-      default: null
     position:
       allOf:
       - $ref: '#/components/schemas/userText2000N'
@@ -1881,7 +1875,6 @@ components:
       allOf:
       - $ref: '#/components/schemas/userText2000'
       nullable: true
-      default: null
       example: Длинный текст
     userText255:
       type: string
@@ -1904,9 +1897,8 @@ components:
             $ref: '#/components/schemas/dictKey'
           value:
             $ref: '#/components/schemas/dictValue'
-          parentKey:
-            $ref: '#/components/schemas/dictKey'
-      default: null
+        parentKey:
+          $ref: '#/components/schemas/dictKey'
     objectTypeMenuProps:
       type: object
       properties:
@@ -2018,12 +2010,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/roleOguid'
           nullable: true
-          default: null
         userOguid:
           allOf:
           - $ref: '#/components/schemas/oguid'
           nullable: true
-          default: null
         visibility:
           $ref: '#/components/schemas/VisibilitySettingRequest'
         create:
@@ -2159,7 +2149,6 @@ components:
           - EXPRESSION
         isNeedToExcludeChild:
           type: integer
-          default: 0
           description: 0 = include child entities (default) · 1 = exclude children
         specifiedOguids:
           type: array
@@ -2186,7 +2175,6 @@ components:
           - EXPRESSION
         isNeedToExcludeChild:
           type: integer
-          default: 0
           description: 0 = include child entities (default) · 1 = exclude children
         specifiedOguids:
           type: array
