@@ -53,6 +53,12 @@
 ## You may:
 - ask questions to clarify ambiguous points.
 
+# SPECIFICATION
+## OpenAPI
+
+- Specification is located in /resources/static/specification folder
+- all methods should correspond the contract
+
 # STACK
 ## PRIMARY
 
@@ -73,4 +79,15 @@
 - Store configuration in `application.yaml`.  
 - DB will be PostgreSQL (snake_case naming style).  
 - Follow best practices:  
-  - DRY (Don’t Repeat Yourself).  
+  - DRY (Don’t Repeat Yourself).
+
+## Multi-lang environment
+### Supported languages
+- `default` in English 
+- ru_RU in Russian
+- en_US in English
+
+## Structure items
+- single log filter (OncePerRequestFilter):
+  - 
+- single exception handler which returns standardized message

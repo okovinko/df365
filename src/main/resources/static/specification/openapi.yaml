@@ -1,0 +1,1461 @@
+openapi: 3.1.0
+servers:
+  - description: Default API Infologistics docuForce 365
+    url: /
+info:
+  description: API Infologistics docuForce 365
+  version: 1.0.0
+  title: API Infologistics docuForce 365
+security:
+  - accessToken: [ ]
+tags:
+  - name: Auth
+    description: Operations related to auth
+  - name: User
+    description: Operations related to user
+  - name: Orgs
+    description: Operations related to organizations
+  - name: OrgUsers
+    description: Operations related to organization user membership
+  - name: OrgModules
+    description: Catalogue of deployable modules
+  - name: OrgApps
+    description: User-deployed application instances
+  - name: OrgDepartments
+    description: Departments (departments) CRUD
+paths:
+  /signin:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+    description: Authentication
+    post:
+      tags:
+        - Auth
+      summary: Email‑based user authentication
+      description: Perform authentication on the server. On success returns a JSON object with `access` and `refresh` fields
+      operationId: authSignin
+      requestBody:
+        description: Username and password in JSON object
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Structure for sending email address and password
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  $ref: '#/components/schemas/email'
+                password:
+                  $ref: '#/components/schemas/password'
+      responses:
+        '200':
+          description: Response object containing Tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tokens'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+      security: [ ]
+  /tokenRefresh:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+    description: Token refresh
+    post:
+      summary: Token refresh
+      tags:
+        - Auth
+      operationId: authTokenRefresh
+      requestBody:
+        description: Object with Refresh Token
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - value
+                - generateNewToken
+              properties:
+                value:
+                  $ref: '#/components/schemas/token'
+                generateNewToken:
+                  type: boolean
+                  nullable: false
+                  description: Flag indicating that a new refreshToken should be generated
+      responses:
+        '200':
+          description: Response object containing Tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tokens'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+      security: [ ]
+  /user:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+    get:
+      summary: Get current user info with list of organizations available to them
+      operationId: authUserGet
+      tags:
+        - User
+      responses:
+        '200':
+          description: Return current user with accessible organizations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserWithMembershipsResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      summary: Update primary user fields
+      operationId: putUser
+      tags:
+        - User
+      requestBody:
+        description: User
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - firstName
+                - lastName
+                - locale
+                - timeZone
+                - middleName
+              properties:
+                firstName:
+                  $ref: '#/components/schemas/firstName'
+                lastName:
+                  $ref: '#/components/schemas/lastName'
+                middleName:
+                  $ref: '#/components/schemas/middleNameN'
+                locale:
+                  $ref: '#/components/schemas/locale'
+                timeZone:
+                  $ref: '#/components/schemas/timezone'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /orgs/{orgOguid}:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      - $ref: '#/components/parameters/orgOguid'
+    get:
+      summary: Get organization
+      operationId: getOrg
+      tags:
+        - Orgs
+      responses:
+        '200':
+          description: Response object containing Organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrgResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /orgs/{orgOguid}/users:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      - $ref: '#/components/parameters/orgOguid'
+    summary: Organization user management
+    get:
+      summary: Get users list
+      operationId: getOrgUsers
+      tags:
+        - OrgUsers
+      responses:
+        '200':
+          description: Organization's users list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/userOrgResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    post:
+      summary: Create a user with memberships
+      operationId: createUser
+      tags:
+        - OrgUsers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      responses:
+        '201':
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userOrgResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /orgs/{orgOguid}/users/{userOguid}:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      - $ref: '#/components/parameters/orgOguid'
+      - $ref: '#/components/parameters/userOguid'
+    description: User operations
+    get:
+      summary: Get user
+      operationId: getUser
+      tags:
+        - OrgUsers
+      responses:
+        '200':
+          description: Response object containing User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userOrgResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    post:
+      summary: Add membership to an existing user
+      operationId: createOrgMembership
+      tags:
+        - OrgUsers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserOrgBaseRequest'
+      responses:
+        '201':
+          description: Membership added; returns the user object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userOrgResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      summary: Update user fields
+      operationId: putOrgUser
+      tags:
+        - OrgUsers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserOrgPutRequest'
+      responses:
+        '200':
+          description: Response object containing User with populated oguid and updated data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userOrgResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      summary: Delete user
+      operationId: deleteUser
+      tags:
+        - OrgUsers
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /orgs/{orgOguid}/availableModules:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      - $ref: '#/components/parameters/orgOguid'
+    get:
+      tags:
+        - OrgModules
+      summary: List available modules
+      operationId: listAvailableModules
+      responses:
+        '200':
+          description: List of modules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AvailableApp'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /orgs/{orgOguid}/apps:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      - $ref: '#/components/parameters/orgOguid'
+    get:
+      tags:
+        - OrgApps
+      summary: List apps
+      operationId: listapps
+      responses:
+        '200':
+          description: List of apps
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/appResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    post:
+      tags:
+        - OrgApps
+      summary: Create app
+      operationId: createapp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/appCreate'
+      responses:
+        '201':
+          description: Created app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /orgs/{orgOguid}/apps/{appOguid}:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      - $ref: '#/components/parameters/orgOguid'
+      - $ref: '#/components/parameters/appOguid'
+    get:
+      tags:
+        - OrgApps
+      summary: Get app
+      operationId: getapp
+      responses:
+        '200':
+          description: app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+        - OrgApps
+      summary: Update app
+      operationId: updateapp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/appEditableRequestPut'
+      responses:
+        '200':
+          description: Updated app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /user/password:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+    put:
+      tags:
+        - User
+      summary: Change current user password
+      operationId: changeUserPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/passwordUpdatePut'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /user/email/init:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+    post:
+      tags:
+        - User
+      summary: Init email change for current user
+      operationId: initEmailChange
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/contactInit'
+      responses:
+        '201':
+          description: Transaction id for confirmation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/transactionIdResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /user/email/confirm:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+    post:
+      tags:
+        - User
+      summary: Confirm email change for current user
+      operationId: confirmEmailChange
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/contactConfirm'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /user/phone/init:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+    post:
+      tags:
+        - User
+      summary: Init phone change for current user
+      operationId: initPhoneChange
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/contactInit'
+      responses:
+        '201':
+          description: Transaction id for confirmation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/transactionId'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /user/phone/confirm:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+    post:
+      tags:
+        - User
+      summary: Confirm phone change for current user
+      operationId: confirmPhoneChange
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/contactConfirm'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /orgs/{orgOguid}/departments:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      - $ref: '#/components/parameters/orgOguid'
+    get:
+      tags:
+        - OrgDepartments
+      summary: List departments
+      operationId: listDepartments
+      responses:
+        '200':
+          description: List of departments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DepartmentResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    post:
+      tags:
+        - OrgDepartments
+      summary: Create department
+      operationId: createDepartment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartmentRequest'
+      responses:
+        '201':
+          description: Created department
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartmentResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /orgs/{orgOguid}/departments/{departmentOguid}:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      - $ref: '#/components/parameters/orgOguid'
+      - $ref: '#/components/parameters/departmentOguid'
+    get:
+      tags:
+        - OrgDepartments
+      summary: Get department
+      operationId: getDepartment
+      responses:
+        '200':
+          description: department
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartmentResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+        - OrgDepartments
+      summary: Update department
+      operationId: updateDepartment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartmentRequestPut'
+      responses:
+        '200':
+          description: Updated department
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartmentResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - OrgDepartments
+      summary: Delete department
+      operationId: deleteDepartment
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  /orgs/{orgOguid}/logo:
+    parameters:
+      - $ref: '#/components/parameters/acceptLanguage'
+      - $ref: '#/components/parameters/orgOguid'
+    get:
+      tags:
+        - Orgs
+      summary: Get organisation logo
+      description: Returns the organisation’s logo as a Base64‑encoded string. 404 is returned when a logo has not yet been
+        uploaded.
+      operationId: getOrgLogo
+      responses:
+        '200':
+          description: Base64‑encoded logo image
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrgLogo'
+        '404':
+          description: Logo not found
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+        - Orgs
+      summary: Replace organisation logo
+      description: Replaces (or creates) the organisation’s logo. Payload is the Base64 string.
+      operationId: replaceOrgLogo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrgLogo'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - Orgs
+      summary: Delete organisation logo
+      operationId: deleteOrgLogo
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+      description: Deletes the organisation’s logo.
+components:
+  schemas:
+    userText255:
+      type: string
+      pattern: ^([\p{L}\p{N}\p{P}\p{S} ]){1,255}$
+      example: Head Office
+    userText2000:
+      type: string
+      pattern: ^([\p{L}\p{N}\p{P}\p{S} ]){1,2000}$
+      example: Head Office
+    orgName:
+      allOf:
+        - $ref: '#/components/schemas/userText2000'
+      description: Full name
+      example: Romashka-Limited LLC
+    OrgResponse:
+      allOf:
+        - description: Organization object
+          required:
+            - oguid
+            - name
+            - alias
+          properties:
+            oguid:
+              $ref: '#/components/schemas/oguid'
+            name:
+              $ref: '#/components/schemas/orgName'
+            alias:
+              $ref: '#/components/schemas/orgAlias'
+        - $ref: '#/components/schemas/OrgCustomization'
+      required:
+        - oguid
+        - name
+        - domain
+        - customizationBackground
+        - customizationTheme
+    userOrgResponse:
+      type: object
+      description: User in list
+      additionalProperties: false
+      required:
+        - oguid
+        - firstName
+        - lastName
+        - middleName
+        - email
+        - phone
+        - position
+        - status
+        - role
+        - locale
+        - timeZone
+        - department
+      properties:
+        oguid:
+          $ref: '#/components/schemas/oguid'
+        firstName:
+          $ref: '#/components/schemas/firstName'
+        lastName:
+          $ref: '#/components/schemas/lastName'
+        middleName:
+          $ref: '#/components/schemas/middleNameN'
+        email:
+          allOf:
+            - $ref: '#/components/schemas/email'
+          nullable: true
+          description: Email address of the user.
+          example: user@example.com
+        phone:
+          allOf:
+            - $ref: '#/components/schemas/phone'
+          nullable: true
+          description: Phone number in E.164 format, including the leading '+'.
+          example: '+12025550123'
+        position:
+          $ref: '#/components/schemas/position'
+        status:
+          $ref: '#/components/schemas/statuses'
+        role:
+          $ref: '#/components/schemas/userRoles'
+        locale:
+          $ref: '#/components/schemas/locale'
+        timeZone:
+          $ref: '#/components/schemas/timezone'
+        department:
+          $ref: '#/components/schemas/DepartmentShortResponse'
+          nullable: true
+    tokens:
+      type: object
+      description: Authorization token
+      required:
+        - access
+        - refresh
+      properties:
+        access:
+          allOf:
+            - $ref: '#/components/schemas/token'
+          description: Token to be used when calling API methods
+        refresh:
+          allOf:
+            - $ref: '#/components/schemas/token'
+          description: Token for refreshing access tokens (JWT)
+    oguid:
+      type: string
+      format: uuid
+      example: 875051bc-15e4-497a-91ec-1ef939a9b053
+    statuses:
+      description: User status
+      type: string
+      enum:
+        - ACTIVE
+        - BLOCKED
+      example: ACTIVE
+    customizationBackground:
+      type: string
+      description: base64 background image representation
+      nullable: true
+      example: R0lGODdhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==
+    customizationTheme:
+      type: integer
+      format: int32
+      description: theme
+      nullable: true
+      example: 1
+    position:
+      allOf:
+        - $ref: '#/components/schemas/userText2000'
+      description: Position
+      example: Operations Manager
+    userRoles:
+      description: User role in organization
+      type: string
+      enum:
+        - USER
+        - ADMINISTRATOR
+      example: ADMINISTRATOR
+    phone:
+      type: string
+      description: Phone
+      nullable: true
+      pattern: ^\d{11,15}$
+      example: '99999999999'
+    timezone:
+      description: User time zone in Europe/Moscow format
+      type: string
+      example: Europe/London
+    locale:
+      description: User locale.
+      type: string
+      example: ru_RU
+    nameString:
+      type: string
+      pattern: ^([\p{L} .@_-]){1,255}$
+    firstName:
+      allOf:
+        - $ref: '#/components/schemas/nameString'
+      description: First name
+      example: John
+    lastName:
+      allOf:
+        - $ref: '#/components/schemas/nameString'
+      description: Last name
+      example: Doe
+    middleNameN:
+      allOf:
+        - $ref: '#/components/schemas/nameString'
+      nullable: true
+      description: Middle name
+      example: Johnson
+    email:
+      type: string
+      maxLength: 150
+      pattern: ^([A-Za-z0-9._-])+@([A-Za-z0-9._-])+\.([A-Za-z]{2,63})$
+      example: example@gmail.com
+      description: Email
+    password:
+      description: 'Password.
+
+        8–50 characters.
+
+        Must contain at least:
+
+        * an uppercase Latin letter
+
+        * a lowercase Latin letter
+
+        * a digit'
+      pattern: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,50}$
+      type: string
+      example: StrongPass1
+    token:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: string
+          description: Token (JWT specification)
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJVAdQssw5c
+    ApiRestResponse500:
+      required:
+        - timestamp
+        - correlationId
+        - message
+        - error
+        - debugMessage
+        - errorCode
+      allOf:
+        - type: object
+          example:
+            error: Internal server error
+            timestamp: 1573803198508
+            message: Internal server error
+            correlationId: 875051bc-15e4-497a-91ec-1ef939a9b053
+            debugMessage: Internal server error
+        - $ref: '#/components/schemas/ApiRestResponse'
+        - type: object
+          example:
+            error: Internal server error
+            timestamp: 1573803198508
+            message: Internal server error
+            correlationId: 875051bc-15e4-497a-91ec-1ef939a9b053
+            debugMessage: Internal server error
+    ApiRestResponse:
+      description: Structure used in server responses when the status is not 200
+      type: object
+      required:
+        - timestamp
+        - correlationId
+        - message
+        - error
+        - debugMessage
+        - errorCode
+      properties:
+        timestamp:
+          type: number
+          format: int64
+          example: 1573803198508
+          description: Epoch timestamp in milliseconds when the response was generated.
+        correlationId:
+          type: string
+          description: Unique identifier to correlate requests and responses for troubleshooting.
+        error:
+          type: string
+          description: Error type (duplicates HttpStatus)
+          example: Bad request
+        message:
+          type: string
+          description: Error message for the end user
+        errorCode:
+          type: string
+          enum:
+            - UNSPECIFIED
+            - IP_RESTRICTION
+          description: Application-specific error code, if any.
+        debugMessage:
+          type: string
+          nullable: true
+          description: Debug information for client developers
+      example:
+        timestamp: 1622553600000
+        correlationId: 8f14e45f-e0c0-4a2b-a1b9-1234567890ab
+        error: Bad request
+        message: Invalid field value
+        errorCode: UNSPECIFIED
+        debugMessage: Field 'email' must be a valid address
+    orgAlias:
+      type: string
+      pattern: ^([A-Za-z0-9_-]){6,30}$
+      description: Organization code
+      example: romashk
+    moduleAlias:
+      allOf:
+        - $ref: '#/components/schemas/orgAlias'
+      description: Module alias
+      example: storage
+    iconN:
+      type: integer
+      format: int32
+      nullable: true
+      description: Icon number representation
+    AvailableApp:
+      type: object
+      properties:
+        moduleName:
+          $ref: '#/components/schemas/moduleAlias'
+        name:
+          $ref: '#/components/schemas/AppName'
+        description:
+          $ref: '#/components/schemas/AppDescriptionN'
+        configurations:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailableAppConfiguration'
+          description: List of available app configurations.
+      required:
+        - moduleName
+        - name
+        - description
+        - configurations
+    AppName:
+      allOf:
+        - $ref: '#/components/schemas/userText255'
+      description: Application name
+      example: file-storage
+    AppDescriptionN:
+      allOf:
+        - $ref: '#/components/schemas/userText2000'
+      description: App description
+      example: Space for storing company objects
+      nullable: true
+    appEditableRequest:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/AppName'
+        description:
+          allOf:
+            - $ref: '#/components/schemas/AppDescriptionN'
+          default: null
+          description: Human‑readable description.
+        icon:
+          allOf:
+            - $ref: '#/components/schemas/iconN'
+          default: null
+      required:
+        - name
+    appEditableResponse:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/AppName'
+        description:
+          $ref: '#/components/schemas/AppDescriptionN'
+        icon:
+          $ref: '#/components/schemas/iconN'
+      required:
+        - name
+        - description
+        - icon
+    appCreate:
+      allOf:
+        - type: object
+          properties:
+            moduleName:
+              $ref: '#/components/schemas/moduleAlias'
+            configurationOguid:
+              allOf:
+                - $ref: '#/components/schemas/oguid'
+              nullable: true
+              default: null
+          required:
+            - moduleName
+        - $ref: '#/components/schemas/appEditableRequest'
+    appResponse:
+      allOf:
+        - type: object
+          properties:
+            oguid:
+              $ref: '#/components/schemas/oguid'
+            moduleName:
+              $ref: '#/components/schemas/moduleAlias'
+            configuration:
+              $ref: '#/components/schemas/AvailableAppConfiguration'
+          required:
+            - oguid
+            - moduleName
+            - configuration
+        - $ref: '#/components/schemas/appEditableResponse'
+      required:
+        - oguid
+        - moduleName
+        - configuration
+        - name
+        - icon
+    OrgCustomization:
+      type: object
+      properties:
+        customizationBackground:
+          $ref: '#/components/schemas/customizationBackground'
+        customizationTheme:
+          $ref: '#/components/schemas/customizationTheme'
+      required:
+        - customizationBackground
+        - customizationTheme
+    configurationStatus:
+      type: string
+      enum:
+        - IN_PROGRESS_CONFIGURATION
+        - DONE
+    AvailableAppConfiguration:
+      type: object
+      required:
+        - oguid
+        - icon
+        - name
+        - description
+      properties:
+        oguid:
+          $ref: '#/components/schemas/oguid'
+        icon:
+          $ref: '#/components/schemas/iconN'
+        name:
+          type: string
+          description: Human‑readable name.
+        description:
+          type: string
+          description: Human‑readable description.
+    transactionIdResponse:
+      type: object
+      required:
+        - transactionId
+      properties:
+        transactionId:
+          $ref: '#/components/schemas/transactionId'
+    passwordUpdate:
+      type: object
+      required:
+        - oldValue
+        - newValue
+      properties:
+        oldValue:
+          $ref: '#/components/schemas/password'
+        newValue:
+          $ref: '#/components/schemas/password'
+    contactInit:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: string
+          description: Refresh token string value.
+      example:
+        value: '+15551234567'
+    contactConfirm:
+      type: object
+      required:
+        - transactionId
+        - code
+      properties:
+        transactionId:
+          $ref: '#/components/schemas/transactionId'
+        code:
+          $ref: '#/components/schemas/verificationCode'
+    verificationCode:
+      type: string
+      pattern: ^[0-9]{6}$
+      example: 123456
+    transactionId:
+      type: string
+      pattern: ^([A-Za-z0-9_-]){7}$
+      example: cFbuSBJ
+    UserBase:
+      type: object
+      additionalProperties: false
+      required:
+        - lastName
+        - firstName
+        - middleName
+        - email
+        - phone
+        - locale
+        - timeZone
+        - department
+      properties:
+        firstName:
+          $ref: '#/components/schemas/firstName'
+        lastName:
+          $ref: '#/components/schemas/lastName'
+        middleName:
+          $ref: '#/components/schemas/middleNameN'
+        email:
+          allOf:
+            - $ref: '#/components/schemas/email'
+          nullable: true
+          description: Email address of the user.
+          example: user@example.com
+        phone:
+          allOf:
+            - $ref: '#/components/schemas/phone'
+          nullable: true
+          description: Phone number in E.164 format, including the leading '+'.
+          example: '+12025550123'
+        locale:
+          $ref: '#/components/schemas/locale'
+        timeZone:
+          $ref: '#/components/schemas/timezone'
+        department:
+          $ref: '#/components/schemas/DepartmentShortResponse'
+          nullable: true
+    UserOrgBaseRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - role
+      properties:
+        role:
+          $ref: '#/components/schemas/userRoles'
+        position:
+          allOf:
+            - $ref: '#/components/schemas/position'
+          default: null
+          description: Job position title.
+        status:
+          allOf:
+            - $ref: '#/components/schemas/statuses'
+          default: ACTIVE
+          description: Employment status code (e.g., 'ACTIVE', 'INACTIVE').
+        departmentOguid:
+          allOf:
+            - $ref: '#/components/schemas/oguid'
+          nullable: true
+          default: null
+          description: Opaque identifier (OGUID) of the department.
+    UserCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/UserCreateBaseRequest'
+        - $ref: '#/components/schemas/UserOrgBaseRequest'
+    UserCreateBaseRequest:
+      type: object
+      required:
+        - lastName
+        - firstName
+        - password
+      oneOf:
+        - required:
+            - email
+        - required:
+            - phone
+      properties:
+        firstName:
+          $ref: '#/components/schemas/firstName'
+        lastName:
+          $ref: '#/components/schemas/lastName'
+        middleName:
+          $ref: '#/components/schemas/middleNameN'
+        email:
+          allOf:
+            - $ref: '#/components/schemas/email'
+          nullable: true
+          default: null
+          description: Email address of the user.
+          example: user@example.com
+        phone:
+          allOf:
+            - $ref: '#/components/schemas/phone'
+          nullable: true
+          default: null
+          description: Phone number in E.164 format, including the leading '+'.
+          example: '+12025550123'
+        locale:
+          allOf:
+            - $ref: '#/components/schemas/locale'
+            - default: en_US
+          description: IETF BCP 47 language tag representing the user's preferred locale (e.g., 'en-US').
+          example: en-US
+        timeZone:
+          allOf:
+            - $ref: '#/components/schemas/timezone'
+            - default: UTC
+          description: IANA time zone name (e.g., 'Europe/Berlin').
+          example: Europe/Berlin
+        password:
+          $ref: '#/components/schemas/password'
+    UserWithMembershipsResponse:
+      allOf:
+        - type: object
+          required:
+            - oguid
+          properties:
+            oguid:
+              $ref: '#/components/schemas/oguid'
+        - $ref: '#/components/schemas/UserBase'
+        - type: object
+          required:
+            - memberships
+          properties:
+            memberships:
+              type: array
+              items:
+                $ref: '#/components/schemas/Membership'
+    orgShort:
+      description: Short representation of Organization object
+      type: object
+      required:
+        - oguid
+        - name
+        - alias
+      properties:
+        oguid:
+          $ref: '#/components/schemas/oguid'
+        name:
+          $ref: '#/components/schemas/orgName'
+        alias:
+          $ref: '#/components/schemas/orgAlias'
+    Membership:
+      type: object
+      required:
+        - org
+        - role
+        - status
+        - position
+      properties:
+        org:
+          $ref: '#/components/schemas/orgShort'
+        role:
+          $ref: '#/components/schemas/userRoles'
+        status:
+          $ref: '#/components/schemas/statuses'
+        position:
+          $ref: '#/components/schemas/position'
+    departmentName:
+      allOf:
+        - $ref: '#/components/schemas/userText255'
+      example: Head Office
+      description: Name of the department.
+    DepartmentResponse:
+      type: object
+      description: Organization department
+      required:
+        - oguid
+        - name
+        - parentOguid
+      properties:
+        oguid:
+          $ref: '#/components/schemas/oguid'
+        name:
+          $ref: '#/components/schemas/departmentName'
+        parentOguid:
+          $ref: '#/components/schemas/parentDepartmentOguid'
+    DepartmentShortResponse:
+      type: object
+      nullable: true
+      required:
+        - oguid
+        - name
+      properties:
+        oguid:
+          $ref: '#/components/schemas/oguid'
+        name:
+          $ref: '#/components/schemas/departmentName'
+    DepartmentRequest:
+      type: object
+      description: Data for updating a department
+      required:
+        - name
+      properties:
+        name:
+          $ref: '#/components/schemas/departmentName'
+        parentOguid:
+          allOf:
+            - $ref: '#/components/schemas/parentDepartmentOguid'
+            - default: null
+          nullable: true
+          description: OGUID of the parent department.
+    parentDepartmentOguid:
+      allOf:
+        - $ref: '#/components/schemas/oguid'
+      description: Parent department oguid
+      nullable: true
+    OrgLogo:
+      type: string
+      description: Base64‑encoded PNG/JPEG image representing the organisation logo
+      example: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAAAwCAIAAABWluXpAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJQSURBVHhe7ZrhccMgDEYzFwMxj6fxMgyTgs2lRkggQEGXO71/bYz6SQ+Ta5zX21DFBChjApQxAcqYAGVMgDImQBkToIwJUMYEKGMClDEByswKCId7fXD+zL9mE8J5eBfJJW7iz94fZwj5Ki6xGF7tKnfyyslG4jIr4PQ54IU7+PnC6csWUVxqOq9okIoxql316HKikQbZK4DX6Yd22eImZIBXE400wU4B5RoeVOWxsd0gB6VkpDm2CUD263VPPxbGQxgZK1Ib2/vxqAYndUiHejzV8wW1AMlI0+wSUG01T52n1Vhg8XpurnM4X++uVR3BSAtsEgCabV9f9VtsXTi32WEIRlphjwDQbDd9YzhDc2sgGGmJLQJGm22sGC+FIxhpjR0CwP3L2TzUEvD76SkIRlrkpwVUlcAuLSj+XTcBHagl7T8LVkEeBkxABxPQ48sCyvL/owOl4HsAWAZYE0BFWmSHgPHsYD6PFUOlGroEI62xRcBweHo8Q6UaAgQjrbFFAEzfid8cDnyxVashQDLSEnsEVO3SK0J1KWy2rkV9iNMSIBppgU0C6o0bF6XBPdbdT6Tyix+wXquBRO7PMWG5/OINKCUaaRoZARTPqEi/faheZx4H1MVEI03yXQHgzhh8+ER+PHwxPD30NhWNNMNWAZH0gIPRMrNT9HEJTjyiiIqykUaZFcDbOtTtep2t6RsI+bqb9I0E+FiLRayGf5/BefY3GoQjsZkWYMhgApQxAcqYAGVMgDImQBkToIwJUMYEKGMClDEBypgAZUyAKu/3H1vD4LyvOww3AAAAAElFTkSuQmCC
+    UserOrgPutRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - role
+        - position
+        - status
+        - departmentOguid
+      properties:
+        role:
+          $ref: '#/components/schemas/userRoles'
+        position:
+          allOf:
+            - $ref: '#/components/schemas/position'
+          description: Job position title.
+        status:
+          allOf:
+            - $ref: '#/components/schemas/statuses'
+          description: Employment status code (e.g., 'ACTIVE', 'INACTIVE').
+        departmentOguid:
+          allOf:
+            - $ref: '#/components/schemas/oguid'
+          nullable: true
+          description: Opaque identifier (OGUID) of the department.
+    appEditableRequestPut:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/AppName'
+        description:
+          allOf:
+            - $ref: '#/components/schemas/AppDescriptionN'
+          description: Human‑readable description.
+        icon:
+          allOf:
+            - $ref: '#/components/schemas/iconN'
+          description: URI or base64‑encoded string representing the icon.
+      required:
+        - name
+        - description
+        - icon
+    passwordUpdatePut:
+      type: object
+      required:
+        - oldValue
+        - newValue
+      properties:
+        oldValue:
+          $ref: '#/components/schemas/password'
+        newValue:
+          $ref: '#/components/schemas/password'
+    DepartmentRequestPut:
+      type: object
+      description: Data for updating a department
+      required:
+        - name
+        - parentOguid
+      properties:
+        name:
+          $ref: '#/components/schemas/departmentName'
+        parentOguid:
+          $ref: '#/components/schemas/parentDepartmentOguid'
+  responses:
+    '204':
+      description: Empty response indicates successful completion
+    '400':
+      description: 400 error response returning an error code object
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiRestResponse'
+    '500':
+      description: 500 error response returning an error code object
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiRestResponse500'
+  parameters:
+    acceptLanguage:
+      name: Accept-Language
+      in: header
+      required: false
+      schema:
+        type: string
+        default: en
+      description: Tells the server which locale is preferred
+    orgOguid:
+      in: path
+      name: orgOguid
+      required: true
+      schema:
+        $ref: '#/components/schemas/oguid'
+      description: Organization OGUID
+    userOguid:
+      in: path
+      name: userOguid
+      required: true
+      schema:
+        $ref: '#/components/schemas/oguid'
+      description: User OGUID
+    appOguid:
+      name: appOguid
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/oguid'
+      description: appOguid identifier
+    departmentOguid:
+      in: path
+      name: departmentOguid
+      required: true
+      schema:
+        $ref: '#/components/schemas/oguid'
+      description: Department OGUID
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
