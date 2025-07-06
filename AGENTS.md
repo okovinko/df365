@@ -88,6 +88,7 @@
 - en_US in English
 
 ## Structure hints
+- common `Coonsts` class for vars, mentioned below
 - single LoggingFilter (OncePerRequestFilter):
   - gets correlationId from header `HEADER_CORRELATION_ID = "Correlation-Id"` or generates a random one, corresponding the specified pattern
   - correlationId is added to MDC under `CORRELATION_ID_LOG_VAR = "correlationId"` (implement in constants) - this addition should be implemented in all child threads
