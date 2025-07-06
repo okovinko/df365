@@ -9,6 +9,7 @@
 - if POST request property has a default value, it should be set as NOT REQUIRED
 - all current task **REQUIREMENTS** should be fulfilled
 - the specification should be valid
+  - every method should include optional `Correlation-Id` header with pattern `^[0-9A-Za-z]{8}$`
 
 ## COMMENTING
 - you should add comments that reflecti the change reason
