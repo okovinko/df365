@@ -16,6 +16,7 @@
 ## Identifiers
 - all external identifiers are UUID-style `oguid`s
 - main entity identifier may be never set - is is always generated on backend-side
-- other entities are referenced by their UUID-s in POST and PUT methods
-- enriched return object which contains `oguid` and some metadata is preferred (but not required (SOFT RULE)) in return schemes, e.g. `orgShort`
+- foreign entities are referenced by their UUID-s in POST and PUT methods
+- enriched return object which contains `oguid` with some metadata is preferred (but not required (SOFT RULE)) in return schemes, e.g. `orgShort`
+- if an entity link is nullable in POST/PUT method request, it's enriched representation in GET response should be nullable as well 
  
