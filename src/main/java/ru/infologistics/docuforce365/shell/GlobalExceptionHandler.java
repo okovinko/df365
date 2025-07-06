@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
+import ru.infologistics.docuforce365.shell.RequestScopeBean;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +19,7 @@ import ru.infologistics.docuforce365.shell.ErrorCode;
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
   private final MessageSource messageSource;
+  private final RequestScopeBean requestScopeBean;
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiRestResponse> handleException(
@@ -31,7 +32,7 @@ public class GlobalExceptionHandler {
         HttpStatus.INTERNAL_SERVER_ERROR.value(),
         message,
         request.getRequestURI(),
-        MDC.get(Coonsts.CORRELATION_ID_LOG_VAR),
+        requestScopeBean.getCorrelationId(),
         ex.getMessage(),
         System.currentTimeMillis(),
         ErrorCode.UNSPECIFIED);
