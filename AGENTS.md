@@ -45,5 +45,10 @@
 - You should follow DRY principle
 - You should also refer to common best-practices
 
+## Commenting rules
+- self-documenting code/expressive naming is preferred to be used in favor of commenting code
+- besides you should annotate some important code blocks  
+
 ## You may:
 - ask questions to clarify ambiguous points.
+

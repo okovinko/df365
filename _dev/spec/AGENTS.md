@@ -9,3 +9,6 @@
 - if POST request property has a default value, it should be set as NOT REQUIRED
 - all current task **REQUIREMENTS** should be fulfilled
 - the specification should be valid
+
+## COMMENTING
+- you should add comments that reflecti the change reason
