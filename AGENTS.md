@@ -89,9 +89,11 @@
 
 ## Structure hints
 - common `Coonsts` class for vars, mentioned below
+- request-scoped bean `RequestScopeBean` to hold the correlation id per request
 - single LoggingFilter (OncePerRequestFilter):
   - gets correlationId from header `HEADER_CORRELATION_ID = "Correlation-Id"` or generates a random one, corresponding the specified pattern
   - correlationId is added to MDC under `CORRELATION_ID_LOG_VAR = "correlationId"` (implement in constants) - this addition should be implemented in all child threads
+  - correlationId is saved to `RequestScopeBean` so other components can access it
   - logs method and url on DEBUG level before processing; headers on TRACE
   - logs method, url, status and execution time in millis on DEBUG after processing
-- single exception handler which returns standardized error structure (refer to spec) with localized message, taken from *.properties file and correlation id from MDC
+- single exception handler which returns standardized error structure (refer to spec) with localized message, taken from *.properties file and correlation id from `RequestScopeBean`

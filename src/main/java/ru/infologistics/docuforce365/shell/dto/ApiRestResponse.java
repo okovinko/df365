@@ -4,14 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.infologistics.docuforce365.shell.ErrorCode;
 
-/** Error response structure matching the API specification. */
+/** Standardized API error response. */
 @Data
 @AllArgsConstructor
 public class ApiRestResponse {
-  private long timestamp;
+  private String type;
+  private String title;
+  private int status;
+  private String detail;
+  private String instance;
   private String correlationId;
-  private String error;
-  private String message;
-  private ErrorCode errorCode;
   private String debugMessage;
+  private long timestamp;
+  private ErrorCode errorCode;
 }
