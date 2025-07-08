@@ -452,7 +452,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/contactInit'
+              $ref: '#/components/schemas/contactEmailInit'
       responses:
         '201':
           description: Transaction id for confirmation
@@ -500,7 +500,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/contactInit'
+              $ref: '#/components/schemas/contactPhoneInit'
       responses:
         '201':
           description: Transaction id for confirmation
@@ -1135,16 +1135,20 @@ components:
           $ref: '#/components/schemas/password'
         newValue:
           $ref: '#/components/schemas/password'
-    contactInit:
+    contactPhoneInit:
       type: object
       required:
-        - value
+        - newValue
       properties:
-        value:
-          type: string
-          description: Refresh token string value.
-      example:
-        value: '+15551234567'
+        newValue:
+          $ref: '#/components/schemas/phone'
+    contactEmailInit:
+      type: object
+      required:
+        - newValue
+      properties:
+        newValue:
+          $ref: '#/components/schemas/email'
     contactConfirm:
       type: object
       required:
